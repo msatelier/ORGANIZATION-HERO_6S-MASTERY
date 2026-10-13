@@ -1,6 +1,6 @@
 # Arquitectura técnica propuesta
 
-Fecha: 13 de octubre de 2026. Diseño objetivo, todavía sin implementación.
+Fecha: 13 de octubre de 2026. Arquitectura objetivo con primer prototipo implementado. GameRoot coordina; GameSession, PlacementRules, SaveStore, CameraController, InteractionController, BedroomView, GameHUD y FeedbackManager están integrados. [Evidencia](PROTOTYPE_REPORT.md).
 
 ## Capas y autoridad del estado
 
@@ -87,7 +87,7 @@ tools/                 verificación reproducible
 docs/                  documentación del proyecto
 ```
 
-El árbol muestra una propuesta; actualmente solo existe documentación y configuración de Git. No se crean directorios vacíos como señal de avance.
+El árbol muestra la organización futura. La base real usa scenes/app, scripts/app/data/domain/interaction/view/ui/services/systems, resources/levels, assets, localization, tests, tools y docs. Las escenas/modelos del dormitorio se generan al ejecutar; no hay directorios vacíos como señal de avance.
 
 ## Extensibilidad comprobable
 

@@ -1,5 +1,20 @@
 # Historial de cambios
 
+## 2026-10-13 — Primer dormitorio jugable
+
+- Base Godot 4.7.2, Resources tipados y escena integrada.
+- Cámara, selección, arrastre, encaje, contenedor, cancelación y deshacer.
+- Limpieza espacial, seguridad doméstica, coleccionable y objetivos.
+- Resultados, comparación, repetición, progreso versionado, ajustes y dos idiomas.
+- Audio/arte geométricos de prototipo.
+- Importación limpia y arranque verificados; 52 comprobaciones de dominio, 34 por renderizador y paquete, 5 de exportación.
+- Ejecutable Windows con PCK separado y APK ARM64 debug firmada.
+- Capturas reales en docs/images y procedimientos reproducibles.
+- Resueltas pérdida de PackedArrays al convertir Resources, datos inválidos y bloqueo del ejecutable con paquete incrustado.
+
+Pendientes: pruebas de jugadores, arte/audio definitivos, touch físico, rendimiento Android e iOS. No se declara completada la aceptación móvil.
+
+
 ## 2026-10-13 — Descubrimiento y planificación
 
 - Leído el prompt maestro completo y conservado como referencia.

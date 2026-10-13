@@ -1,6 +1,6 @@
 # Análisis y orquestación del proyecto
 
-Fecha: 13 de octubre de 2026. Estado: planificación inicial; el juego no está implementado.
+Fecha: 13 de octubre de 2026. Este documento registra el análisis previo. El estado actual está en [PROTOTYPE_REPORT.md](PROTOTYPE_REPORT.md).
 
 ## Evaluación del prompt maestro
 
@@ -8,7 +8,7 @@ El documento define un producto coherente: organización satisfactoria en 3D, ex
 
 Sirve como visión y contrato de calidad. Para ejecutar el proyecto necesita convertirse en tareas pequeñas, decisiones explícitas y entregas jugables. Enumerar once especialidades y catorce servicios no determina todavía el orden de construcción ni justifica implementar todos esos sistemas.
 
-La frase «comienza por la Fase 0 y continúa con la Fase 1» pertenece al prompt analizado. El pedido actual solicita análisis y organización. Esta entrega prepara documentación y control de versiones; la construcción del juego queda descrita como trabajo siguiente.
+La primera solicitud fue de análisis y organización. La documentación y Git se prepararon en esa entrega; Matías autorizó después comenzar la creación y ya existe un primer ciclo jugable de escritorio.
 
 ## Aspectos que debemos concretar
 

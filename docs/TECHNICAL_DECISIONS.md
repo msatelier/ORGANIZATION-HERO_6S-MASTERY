@@ -1,6 +1,6 @@
 # Decisiones técnicas y auditoría inicial
 
-Fecha: 13 de octubre de 2026. Los resultados de entorno no acreditan ninguna función del juego.
+Fecha: 13 de octubre de 2026. Auditoría inicial y decisiones de implementación. Los resultados actuales están en [PROTOTYPE_REPORT.md](PROTOTYPE_REPORT.md).
 
 ## Inspección del repositorio
 
@@ -40,7 +40,7 @@ Mobile se prueba primero para el diorama 3D. Compatibility se compara sobre la m
 
 Evitar inicialmente efectos exclusivos de un renderizador: materiales sencillos, iluminación moderada y ninguna dependencia de compute para la limpieza. Medir arranque, tiempos de frame, memoria y claridad visual con acciones reales. La PC verifica funcionamiento; elegir definitivamente la cobertura móvil requiere teléfono de referencia.
 
-Resultado actual: no existe escena representativa ni benchmark. No hay renderizador configurado todavía en este repositorio.
+Actualización de implementación: Mobile configurado por defecto. El ciclo completo pasó en Mobile y Compatibility sobre la PC; el contador puntual fue 187/294 draw calls. No se midieron frame times ni hardware móvil.
 
 ## D-003: Resources estáticos y sesión mutable separada
 
@@ -75,7 +75,7 @@ La [referencia de SceneTree](https://docs.godotengine.org/en/4.7/classes/class_s
 
 Reutilizar JDK 17 y SDK instalados. La [guía Android](https://docs.godotengine.org/en/stable/tutorials/export/exporting_for_android.html) describe configuración, firma y AAB. Crear una APK de depuración tan pronto exista una escena ejecutable y no reservar exportación para el final. Los requisitos vigentes de tiendas y SDK se revisarán de nuevo antes de publicación.
 
-Matías confirmó que todavía no dispone de Android. Exportación, pruebas de escritorio y eventualmente emulación son posibles; tacto, háptica, GPU móvil y rendimiento sostenido quedan pendientes. No se generó APK ni AAB de este juego.
+Matías confirmó que todavía no dispone de Android. Exportación, pruebas de escritorio y eventualmente emulación son posibles; tacto, háptica, GPU móvil y rendimiento sostenido quedan pendientes. Actualización: APK ARM64 de depuración generada y firma v2/v3 comprobada. AAB, instalación y pruebas físicas pendientes.
 
 iOS requiere exportar desde macOS con Xcode, según la [guía iOS 4.7](https://docs.godotengine.org/en/4.7/tutorials/export/exporting_for_ios.html). Tener la plantilla iOS en Windows no elimina ese requisito. El simulador iOS admite Compatibility; la ruta Mobile deberá probarse en hardware Apple compatible.
 
@@ -85,6 +85,14 @@ La URL canónica inicialmente rechazó autenticación porque la configuración e
 
 Este checkout tiene un core.sshCommand local que selecciona la clave existente y mantiene verificación de host y modo no interactivo. No se editó la clave, no se mostró su contenido y no se cambió la configuración SSH global. La ruta privada no está en archivos versionados. Se conserva el remoto canónico solicitado.
 
-## Límites de esta entrega
+## Alcance de la auditoría inicial
 
-Verificados: lectura del prompt completo, contenido inicial del repositorio, herramientas indicadas, lectura SSH y clonación. Documentación y configuración de Git preparadas. No verificados: apertura de un proyecto de este juego, importación, scripts, controles, arte, limpieza, guardado, exportación, FPS, tamaño o iOS. Los resultados de sincronización de la documentación se registran en el historial.
+La auditoría inicial verificó entorno y acceso. La implementación posterior comprobó importación limpia, arranque, reglas, controles simulados, limpieza, guardado, resultados, exportaciones y tamaños. Los FPS móviles, la usabilidad humana y iOS siguen pendientes.
+
+## D-009: conservar Resources de texto al exportar
+
+En el paquete generado con conversión binaria, las categorías y posiciones PackedArray quedaron vacías aunque la fuente funcionaba. Se mantuvo la inicialización explícita de tipos y se desactivó editor/export/convert_text_resources_to_binary. El paquete resultante pasó cinco comprobaciones de datos, 52 de dominio y el ciclo completo de entrada. Es una solución comprobada en este entorno, sin atribuir una causa interna definitiva del motor. La conversión puede reevaluarse con una reproducción mínima y nueva versión.
+
+## D-010: paquete Windows separado y audio de prueba
+
+Windows se exporta con PCK separado y el ejecutable del motor sin modificaciones, con arranque independiente verificado. El intento de incrustar PCK fue bloqueado por Application Control; no se cambió la política del sistema. Audio generado localmente para feedback básico y música; en headless se omite reproducción para evitar una referencia retenida al salir. Arte y audio finales siguen pendientes.

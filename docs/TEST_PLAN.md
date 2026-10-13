@@ -1,13 +1,13 @@
 # Plan de pruebas y aceptación
 
-Fecha: 13 de octubre de 2026. Estado actual: planificación; no existe código del juego ni pruebas ejecutadas sobre él.
+Fecha: 13 de octubre de 2026. Primer prototipo verificado. [Informe y evidencias](PROTOTYPE_REPORT.md): 52 comprobaciones de reglas, 34 de integración por renderizador y sobre paquete, 5 de datos exportados. Hardware móvil pendiente.
 
 ## Niveles de verificación
 
 1. Entorno: versiones, repositorio y acceso. Comprobado en esta entrega.
-2. Importación/arranque: proyecto abre, scripts analizan, escena ejecuta. Pendiente.
-3. Reglas automatizadas: ubicación, objetivos, dependencias, riesgos y persistencia. Pendiente.
-4. Integración y experiencia: controles, cámara, visuales, audio y ciclo completo. Pendiente.
+2. Importación/arranque: proyecto, copia limpia y paquete ejecutan sin errores. Comprobado.
+3. Reglas automatizadas: ubicación, objetivos, dependencias, riesgos y persistencia. Comprobadas.
+4. Integración: ciclo completo con renderizado y eventos mouse/touch simulados comprobado. Usabilidad y escucha humanas pendientes.
 5. Móvil real: tacto, ciclo de vida, háptica, rendimiento y estabilidad sostenida. Pendiente; Matías no dispone aún de Android.
 
 La exportación correcta no prueba experiencia ni rendimiento. La ejecución headless no prueba rendering, gestos ni sonido. Una prueba con mouse no acredita una prueba con touch.
@@ -16,21 +16,21 @@ La exportación correcta no prueba experiencia ni rendimiento. La ejecución hea
 
 | Nº | Criterio | Verificación prevista | Estado |
 | --- | --- | --- | --- |
-| 1 | Proyecto abre sin errores | Importación limpia y análisis de scripts | Pendiente |
-| 2 | Escena principal ejecuta | Arranque headless y arranque gráfico | Pendiente |
-| 3 | Cámara con mouse y touch | Órbita, pinza, límites, transición y retorno | Pendiente; touch físico sin hardware |
-| 4 | Seleccionar y mover | Arrastre, cancelación, UI y selección con oclusión | Pendiente |
-| 5 | Encaje valida reglas | Categoría, capacidad, orientación, tolerancia y destinos alternativos | Pendiente |
-| 6 | Acción inválida comprensible | Motivo correcto y estado sin corrupción | Pendiente |
-| 7 | Limpieza modifica superficie | Trayectoria, cobertura distinta, bordes y visual | Pendiente |
-| 8 | Objetivos completables | Dependencias válidas, acciones independientes y final | Pendiente |
-| 9 | Coleccionable descubrible | Ocultación, hallazgo, duplicados y persistencia | Pendiente |
-| 10 | Nivel finaliza | Condiciones obligatorias satisfechas, un solo cierre | Pendiente |
-| 11 | Resumen visible | Resultados coherentes, repetición y estrellas sin bloqueo | Pendiente |
-| 12 | Guardar y recuperar | Reinicio, respaldo, corrupción, IDs y versiones | Pendiente |
-| 13 | Pruebas automatizables pasan | Runner con errores detectables y salida no cero | Pendiente |
+| 1 | Proyecto abre sin errores | Importación limpia y análisis de scripts | Verificado, también en copia sin caché |
+| 2 | Escena principal ejecuta | Arranque headless y arranque gráfico | Verificado desde fuente, paquete y ejecutable |
+| 3 | Cámara con mouse y touch | Órbita, pinza, límites, transición y retorno | Simulación verificada; touch físico pendiente |
+| 4 | Seleccionar y mover | Arrastre, cancelación, UI y selección con oclusión | Verificado por entrada y revisión visual |
+| 5 | Encaje valida reglas | Categoría, capacidad, orientación, tolerancia y destinos alternativos | Verificado por reglas e integración |
+| 6 | Acción inválida comprensible | Motivo correcto y estado sin corrupción | Feedback/estado verificados; comprensión humana pendiente |
+| 7 | Limpieza modifica superficie | Trayectoria, cobertura distinta, bordes y visual | Verificado en ambos renderizadores y paquete |
+| 8 | Objetivos completables | Dependencias válidas, acciones independientes y final | Verificado |
+| 9 | Coleccionable descubrible | Ocultación, hallazgo, duplicados y persistencia | Verificado, incluido repetir nivel |
+| 10 | Nivel finaliza | Condiciones obligatorias satisfechas, un solo cierre | Verificado |
+| 11 | Resumen visible | Resultados coherentes, repetición y estrellas sin bloqueo | Verificado y capturado |
+| 12 | Guardar y recuperar | Reinicio, respaldo, corrupción, IDs y versiones | JSON y recuperación verificados; suspensión física pendiente |
+| 13 | Pruebas automatizables pasan | Runner con errores detectables y salida no cero | Verificado con scripts reproducibles |
 | 14 | Documentar hardware pendiente | Dispositivo Android ausente registrado; plan de medición definido | Limitación documentada; pruebas físicas pendientes |
-| 15 | Sin bloqueos del ciclo | Recorrido completo y seguimiento de defectos | Pendiente |
+| 15 | Sin bloqueos del ciclo | Recorrido completo y seguimiento de defectos | Sin bloqueos en recorridos automatizados de PC; hardware pendiente |
 
 ## Casos críticos de reglas
 
@@ -69,6 +69,6 @@ No hay Android disponible. No se comprobó iOS. El simulador o el escritorio pue
 
 ## Automatización y trazabilidad
 
-Runner inicial previsto en GDScript headless, sin framework obligatorio. Automatizar validadores, reglas, progresión y persistencia; documentar el comando, código de salida y registros cuando se implemente. GitHub Actions puede importar/analizar y ejecutar esas pruebas con Godot 4.7.2 fijado. No existe aún workflow de CI.
+Runner GDScript implementado: tests/domain_tests.gd para headless y tests/interaction_smoke.gd para ventana real. tests/export_data_tests.gd verifica datos del paquete. tools/verify.ps1 y tools/export-prototype.ps1 comprueban salida y errores de registros. No se usa un framework adicional. Automatizar validadores, reglas, progresión y persistencia; documentar el comando, código de salida y registros cuando se implemente. GitHub Actions puede importar/analizar y ejecutar esas pruebas con Godot 4.7.2 fijado. No existe aún workflow de CI.
 
 Registrar cada resultado con commit, prueba, plataforma, resultado, evidencia y defecto asociado. Solo marcar «verificado» lo efectivamente ejecutado. La lista de pendientes no bloquea el avance de tareas independientes, pero debe acompañar la entrega.

@@ -1,13 +1,13 @@
 # Hoja de ruta y backlog inicial
 
-Fecha: 13 de octubre de 2026. Hitos por resultado; sin calendario comercial comprometido.
+Fecha: 13 de octubre de 2026. Actualizada tras el primer prototipo. Hitos por resultado; sin calendario comercial comprometido.
 
 | Hito | Fase del prompt | Resultado | Estado |
 | --- | --- | --- | --- |
-| M0: preparación y base | 0 | Entorno auditado, plan y proyecto mínimo que abre/arranca | En curso: auditoría/documentación; base Godot pendiente |
-| M1: interacción fundamental | 1 | Cámara, objeto y destinos con reglas | Pendiente |
-| M2: tareas del dormitorio | 1 | Clasificación, contenedor, limpieza, seguridad y coleccionable | Pendiente |
-| M3: ciclo completo | 1 | Objetivos, final, resumen, antes/después y reanudación | Pendiente |
+| M0: preparación y base | 0 | Entorno auditado, plan y proyecto mínimo que abre/arranca | Base Windows completada; copia limpia verificada |
+| M1: interacción fundamental | 1 | Cámara, objeto y destinos con reglas | Comprobado en PC; touch físico pendiente |
+| M2: tareas del dormitorio | 1 | Clasificación, contenedor, limpieza, seguridad y coleccionable | Implementado y comprobado en PC |
+| M3: ciclo completo | 1 | Objetivos, final, resumen, antes/después y reanudación | Prototipo completo comprobado desde fuente y paquete |
 | M4: calidad y validación | 2 y cierre de 1 | Controles refinados, presentación y evidencia móvil | Pendiente; sin dispositivo Android |
 | M5: casa ampliada | 3 | Cocina reutilizable, luego otros tres escenarios | Pendiente |
 | M6: fábrica y retos | 4 | Escenarios industriales y desafío opcional | Pendiente |
@@ -15,9 +15,9 @@ Fecha: 13 de octubre de 2026. Hitos por resultado; sin calendario comercial comp
 
 ## M0 — Preparación y base ejecutable
 
-Realizado: análisis del prompt, auditoría de herramientas, inspección/clonación y documentación de decisiones. No se reemplazó código funcional porque el repositorio solo tenía un README.
+Realizado: auditoría, planificación, base ejecutable, importación limpia, comparación funcional de renderizadores y exportaciones. [Informe de implementación](PROTOTYPE_REPORT.md).
 
-Trabajo siguiente:
+Trabajo realizado para la base:
 
 - Crear project.godot y fijar versión del motor.
 - Escena de arranque y dormitorio geométrico con materiales legibles.

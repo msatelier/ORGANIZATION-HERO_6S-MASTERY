@@ -1,42 +1,66 @@
 # Organization Hero: 6S Mastery
 
-Juego casual de organización y limpieza en dioramas 3D para Android e iOS, desarrollado con Godot y GDScript tipado. La experiencia relajante y satisfactoria guía el aprendizaje de las 6S mediante acciones.
+Primer prototipo jugable de organización y limpieza en un dormitorio 3D. Godot **4.7.2**, GDScript tipado, modo Relax, español e inglés.
 
-## Estado al 13 de octubre de 2026
+![Dormitorio al empezar](docs/images/bedroom-before.png)
 
-Descubrimiento y planificación inicial documentados. Repositorio local conectado a GitHub. **Todavía no hay un proyecto Godot, escenas jugables ni pruebas del juego.** La Fase 0 continúa con la creación y validación de la base ejecutable; la Fase 1 será el dormitorio completo.
+## Jugar
 
-La primera entrega responde al pedido de analizar el prompt maestro y organizar el desarrollo. La instrucción de ejecución del documento adjunto se convierte en la hoja de ruta de las siguientes entregas.
+**Con Godot:** importar `project.godot`, abrir el proyecto y presionar **F5**. La habitación, los objetos y el HUD se generan al ejecutar; la escena de arranque muestra solo el coordinador en el editor.
+
+**Versión Windows local:** ejecutar `build/OrganizationHero.exe`. Mantener `OrganizationHero.pck` en la misma carpeta. Los binarios se generan con el comando de exportación indicado abajo y no se versionan en Git.
+
+- Arrastrar objetos hacia su destino: libros, ropa, reciclaje y juguetes.
+- Tocar el armario para abrirlo. La ropa también puede ir al cesto.
+- Arrastrar el fondo o usar botón derecho para girar la cámara; rueda para zoom.
+- En touch: arrastrar y usar dos contactos para pinza/orbitar.
+- Activar el paño y recorrer la mesa; el objetivo requiere 85% de cobertura.
+- Despejar el paso guardando el peluche y tocar el recuerdo dorado que aparece.
+- Al completar los objetivos obligatorios, revisar la habitación.
+- Comparar antes/después o repetir; el coleccionable permanece registrado.
+
+Atajos: **C** paño, **U** deshacer, **Espacio** vista general, **Esc** cancelar/cerrar ajustes. Los ajustes permiten cambiar idioma, volumen, animaciones y vibración opcional.
+
+## Qué funciona
+
+Ocho objetos, cinco destinos con categorías/capacidad/tolerancia, armario interactivo, dos destinos válidos para ropa, selección/arrastre/cancelación, deshacer organización, limpieza espacial progresiva, riesgo simple de tropiezo, hallazgo oculto, objetivos, pistas, resultados con puntuación/estrellas, comparación y repetición.
+
+Progreso JSON versionado con temporal y respaldo bajo `user://`. Ajustes separados. Las versiones futuras de progreso se conservan sin sobrescribir. Audio sintetizado de prototipo y feedback visual básico; sin SDK comerciales.
+
+## Verificación
+
+Desde PowerShell, con Godot 4.7.2 instalado:
+
+```powershell
+.\tools\verify.ps1
+.\tools\verify.ps1 -Graphics
+.\tools\export-prototype.ps1 -Android
+```
+
+Se puede indicar `-GodotExecutable` si está en otra ruta. Android requiere JDK/SDK, plantillas coincidentes y configuración Android del editor. VS Code incluye configuración para la instalación local; sus rutas se ajustan en otras computadoras. La depuración interactiva de VS Code aún no se verificó.
+
+Resultados: **52 comprobaciones de reglas/persistencia**, **34 de integración en Mobile**, **34 en Compatibility**, **34 sobre el paquete exportado** y **5 de datos exportados**, sin fallos. Importación de copia limpia, arranque y firma APK verificados. Las pruebas gráficas simulan eventos mediante la entrada del motor; no equivalen a touch físico.
+
+La conversión de Resources a binario se desactiva porque, en la exportación probada, vaciaba categorías/posiciones. La regresión se comprueba contra el paquete, además de probar desde el editor.
+
+## Entregas y límites
+
+`build/OrganizationHero-debug.apk`: Android ARM64 de depuración, firma v2/v3 verificada, aproximadamente **27.13 MiB**. No se instaló en un teléfono. Ese tamaño no acredita la descarga de una futura AAB comercial.
+
+`build/OrganizationHero.exe` + `.pck`: aproximadamente **98.49 MiB** en conjunto. Arranque independiente verificado; ciclo completo del paquete comprobado usando el Godot instalado.
+
+Escenario y audio provisionales. Faltan pruebas con jugadores, arte/audio definitivos, mediciones móviles y validación de dispositivos. Matías todavía no dispone de Android. iOS queda pendiente de macOS/Xcode y hardware Apple. No se declaran cumplidos los objetivos móviles de FPS.
 
 ## Documentación
 
-- [Análisis y orquestación](docs/ORCHESTRATION_PLAN.md): alcance, responsabilidades, dependencias y decisiones pendientes.
-- [Diseño del juego](docs/GAME_DESIGN_DOCUMENT.md): propuesta concreta del dormitorio.
-- [Arquitectura técnica](docs/TECHNICAL_ARCHITECTURE.md): datos, estado, reglas, escenas y servicios.
-- [Decisiones técnicas](docs/TECHNICAL_DECISIONS.md): herramientas verificadas y alternativas.
-- [Hoja de ruta](docs/DEVELOPMENT_ROADMAP.md): hitos y criterios de cierre.
-- [Plan de pruebas](docs/TEST_PLAN.md): cobertura de los 15 criterios del MVP.
-- [Historial](docs/CHANGELOG.md): cambios y limitaciones.
-- [Prompt maestro original](docs/MASTER_PROMPT.md): fuente de requisitos conservada sin cambios.
+- [Informe del primer prototipo](docs/PROTOTYPE_REPORT.md).
+- [Diseño](docs/GAME_DESIGN_DOCUMENT.md).
+- [Arquitectura](docs/TECHNICAL_ARCHITECTURE.md).
+- [Decisiones técnicas](docs/TECHNICAL_DECISIONS.md).
+- [Hoja de ruta](docs/DEVELOPMENT_ROADMAP.md).
+- [Pruebas y aceptación](docs/TEST_PLAN.md).
+- [Análisis inicial](docs/ORCHESTRATION_PLAN.md).
+- [Historial](docs/CHANGELOG.md).
+- [Prompt original](docs/MASTER_PROMPT.md).
 
-## Herramientas verificadas
-
-Godot **4.7.2.stable.official.ed1daf0bf**, plantillas **4.7.2.stable**, VS Code **1.141.0**, Godot Tools **2.7.1**, Git **2.54.0.windows.1**, OpenJDK **17.0.20.1** y Android Platform Tools **37.0.1**.
-
-Mobile será el primer candidato de renderizado para el diorama 3D. La elección definitiva dependerá de comparar una escena representativa con Compatibility. No se ha ejecutado todavía esa comparación.
-
-El equipo disponible es Windows. Matías confirmó que **no dispone todavía de un dispositivo Android**. La preparación de Android puede realizarse aquí; la validación física sigue pendiente. iOS requiere posteriormente macOS con Xcode.
-
-## Control de versiones
-
-Repositorio: [msatelier/ORGANIZATION-HERO_6S-MASTERY](https://github.com/msatelier/ORGANIZATION-HERO_6S-MASTERY).
-
-Origen SSH: `git@github.com:msatelier/ORGANIZATION-HERO_6S-MASTERY.git`.
-
-Trabajar con cambios pequeños, commits coherentes, ramas cortas por hito y revisiones antes de integrar. `main` debe mantener una base comprobada. Los binarios de entrega irán en Releases o artefactos; las claves y los datos locales del jugador quedan fuera del repositorio.
-
-La asociación de este checkout con la clave SSH existente está en su configuración local de Git, no en los archivos versionados. En otra computadora habrá que configurar su propia autenticación.
-
-## Próxima entrega
-
-Crear la base Godot, la habitación geométrica, una cámara orbital y una primera interacción con un objeto. Ejecutar importación y prueba de arranque, comparar renderizadores y registrar resultados. Aún no existe un comando de pruebas del juego ni una escena principal ejecutable.
+Desarrollo conectado a [GitHub](https://github.com/msatelier/ORGANIZATION-HERO_6S-MASTERY). Primera implementación en `feat/bedroom-vertical-slice`.

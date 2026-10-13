@@ -1,6 +1,6 @@
 # Diseño del juego
 
-Estado: propuesta inicial del 13 de octubre de 2026. Ninguna mecánica está implementada todavía.
+Estado: diseño inicial con primer prototipo implementado al 13 de octubre de 2026. [Alcance y evidencia actuales](PROTOTYPE_REPORT.md): ocho objetos y cuatro categorías. Los rangos siguientes se conservan como hipótesis iniciales.
 
 ## Promesa de experiencia
 
@@ -59,7 +59,7 @@ El antes/después debe mostrar la misma composición de cámara para que la mejo
 
 Geometría inicial comprensible con materiales compartidos y colores cálidos. Los modelos provisionales se marcarán como tales. La mejora visual sucede después de probar escala, cámara, siluetas y legibilidad de destinos.
 
-Audio básico por material y confirmaciones suaves. Mezclas separadas para música y efectos; háptica opcional donde sea compatible. Registrar fuente/licencia de cada recurso externo. No hay recursos de arte o audio incorporados todavía.
+Audio básico por material y confirmaciones suaves. Mezclas separadas para música y efectos; háptica opcional donde sea compatible. Registrar fuente/licencia de cada recurso externo. El prototipo incorpora geometría, materiales, icono SVG y audio sintetizado propios. Los recursos definitivos y la escucha manual siguen pendientes.
 
 ## Progresión y contenido posterior
 

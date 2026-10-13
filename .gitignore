@@ -1,5 +1,6 @@
 # Caché e importación de Godot 4: conservar fuentes, .import y .uid.
 .godot/
+localization/*.translation
 
 # Exportaciones y registros locales.
 build/
