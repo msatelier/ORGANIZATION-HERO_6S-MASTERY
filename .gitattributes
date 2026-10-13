@@ -1,0 +1,20 @@
+* text=auto eol=lf
+*.md text eol=lf
+# Conservar exactamente los bytes del documento aportado por el usuario.
+docs/MASTER_PROMPT.md -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
+*.gd text eol=lf
+*.gdshader text eol=lf
+*.godot text eol=lf
+*.tscn text eol=lf
+*.tres text eol=lf
+*.cfg text eol=lf
+*.json text eol=lf
+*.csv text eol=lf
+*.svg text eol=lf
+*.ps1 text eol=crlf
+*.png binary
+*.jpg binary
+*.webp binary
+*.glb binary
+*.ogg binary
+*.wav binary

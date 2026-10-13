@@ -1,0 +1,30 @@
+# Caché e importación de Godot 4: conservar fuentes, .import y .uid.
+.godot/
+
+# Exportaciones y registros locales.
+build/
+dist/
+exports/
+artifacts/
+logs/
+*.log
+
+# Datos y credenciales locales.
+.env
+.env.*
+!.env.example
+*.keystore
+*.jks
+*.p12
+*.pfx
+*.mobileprovision
+export_credentials.cfg
+
+# Herramientas y sistema operativo.
+Thumbs.db
+Desktop.ini
+.DS_Store
+*.tmp
+*.bak
+*.blend1
+*.blend2
