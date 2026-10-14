@@ -16,6 +16,15 @@ var mask_dirty: bool = true
 var before_mode: bool = false
 var animated: bool = true
 var motion_tweens: Dictionary[String, Tween] = {}
+var door_tweens: Dictionary[String, Tween] = {}
+var item_destinations: Dictionary[String, Vector3] = {}
+var door_angles: Dictionary[String, float] = {}
+var destination_guides: Dictionary[String, Node3D] = {}
+var selected_item_id: String = ""
+var hovered_target_id: String = ""
+var hovered_allowed: bool = true
+var shown_cleaned_count: int = -1
+var shown_before_mode: bool = false
 
 func _init(definition: LevelData) -> void:
 	level = definition
@@ -34,6 +43,7 @@ func _ready() -> void:
 
 func bind(state: GameSession) -> void:
 	session = state
+	shown_cleaned_count = -1
 	session.changed.connect(refresh)
 	refresh()
 
@@ -180,6 +190,15 @@ func _build_target(rule: ItemPlacementRule) -> void:
 	var body: StaticBody3D = _body("target", rule.id, center - Vector3(0, 0.12, 0), Vector3(1.25, 0.22, 0.78), 2)
 	var pad: MeshInstance3D = box(body, Vector3.ZERO, Vector3(1.18, 0.03, 0.7), rule.color)
 	pad.name = "Pad"
+	var guide: Node3D = Node3D.new()
+	guide.name = "Guide"
+	body.add_child(guide)
+	for x: float in [-0.66, 0.66]:
+		box(guide, Vector3(x, 0.03, 0), Vector3(0.045, 0.045, 0.88), Color("#f8d283"))
+	for z: float in [-0.44, 0.44]:
+		box(guide, Vector3(0, 0.03, z), Vector3(1.36, 0.045, 0.045), Color("#f8d283"))
+	guide.visible = false
+	destination_guides[rule.id] = guide
 	if rule.id in ["basket", "toy_box", "recycling"]:
 		box(body, Vector3(0, -0.18, 0), Vector3(1.2, 0.3, 0.78), rule.color.darkened(0.17))
 		for x: float in [-0.61, 0.61]:
@@ -253,8 +272,12 @@ func refresh() -> void:
 			visible_now = rule.container_id.is_empty() or session.opened[rule.container_id]
 		body.visible = visible_now
 		body.collision_layer = 1 if visible_now and not before_mode else 0
-		if motion_tweens.has(item.id) and motion_tweens[item.id].is_valid():
-			motion_tweens[item.id].kill()
+		var moving: Tween = motion_tweens.get(item.id)
+		if animated and moving != null and moving.is_valid() and moving.is_running() and item_destinations.get(item.id) == position_to:
+			continue
+		if moving != null and moving.is_valid():
+			moving.kill()
+		item_destinations[item.id] = position_to
 		if animated and body.position.distance_to(position_to) > 0.01:
 			var tween: Tween = create_tween()
 			tween.tween_property(body, "position", position_to, 0.22).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
@@ -262,7 +285,19 @@ func refresh() -> void:
 		else:
 			body.position = position_to
 	for container: ContainerData in level.containers:
-		door_nodes[container.id].rotation.y = deg_to_rad(-100) if session.opened[container.id] and not before_mode else 0.0
+		var angle: float = deg_to_rad(-100) if session.opened[container.id] and not before_mode else 0.0
+		var door: Node3D = door_nodes[container.id]
+		var turning: Tween = door_tweens.get(container.id)
+		if not (animated and turning != null and turning.is_valid() and turning.is_running() and door_angles.get(container.id) == angle):
+			if turning != null and turning.is_valid():
+				turning.kill()
+			door_angles[container.id] = angle
+			if animated and absf(door.rotation.y - angle) > 0.001:
+				var tween: Tween = create_tween()
+				tween.tween_property(door, "rotation:y", angle, 0.28).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
+				door_tweens[container.id] = tween
+			else:
+				door.rotation.y = angle
 		labels[container.id].visible = before_mode or not session.opened[container.id]
 	for rule: ItemPlacementRule in level.placements:
 		var active: bool = rule.container_id.is_empty() or session.opened[rule.container_id]
@@ -271,7 +306,11 @@ func refresh() -> void:
 	collectible_node.visible = session.collectible_visible() and not before_mode
 	collectible_node.collision_layer = 16 if collectible_node.visible else 0
 	hazard_marker.visible = before_mode or not session.hazard_safe()
-	mask_dirty = true
+	_refresh_destinations()
+	if shown_cleaned_count != session.cleaned_count or shown_before_mode != before_mode:
+		mask_dirty = true
+		shown_cleaned_count = session.cleaned_count
+		shown_before_mode = before_mode
 
 func _process(_delta: float) -> void:
 	if mask_dirty and session != null:
@@ -297,20 +336,40 @@ func refresh_labels() -> void:
 			for container: ContainerData in level.containers:
 				if container.id == key:
 					labels[key].text = tr(container.name_key)
+	_refresh_destinations()
 
 func select(item_id: String) -> void:
+	selected_item_id = item_id
 	for key: String in item_nodes:
 		item_nodes[key].get_node("Selection").visible = key == item_id
+	_refresh_destinations()
 
 func highlight(target_id: String, allowed: bool = true) -> void:
+	hovered_target_id = target_id
+	hovered_allowed = allowed
+	_refresh_destinations()
+
+func _refresh_destinations() -> void:
 	for key: String in target_nodes:
 		var rule: ItemPlacementRule = level.placement(key)
 		var pad: MeshInstance3D = target_nodes[key].get_node("Pad")
-		pad.material_override = material((Color("#f8d283") if allowed else Color("#dc796a")) if key == target_id else rule.color)
+		var hovered: bool = key == hovered_target_id
+		pad.material_override = material((Color("#f8d283") if hovered_allowed else Color("#dc796a")) if hovered else rule.color)
+		var available: bool = session != null and not selected_item_id.is_empty() and session.placement_reason(selected_item_id, key).is_empty()
+		destination_guides[key].visible = available and not before_mode
+		labels[key].text = tr(rule.name_key)
+		if available:
+			var occupied: int = 0
+			for item_id: String in session.placements:
+				if session.placements[item_id] == key:
+					occupied += 1
+			labels[key].text += "\n" + tr("FREE_SLOTS") % (rule.slots.size() - occupied)
 
-func nearest_target(screen_position: Vector2, camera: Camera3D) -> String:
+func nearest_target(screen_position: Vector2, camera: Camera3D, item_id: String = "") -> String:
 	var nearest: String = ""
 	var distance: float = INF
+	var available: String = ""
+	var available_distance: float = INF
 	for rule: ItemPlacementRule in level.placements:
 		var center: Vector3 = target_nodes[rule.id].global_position
 		if camera.is_position_behind(center):
@@ -319,4 +378,7 @@ func nearest_target(screen_position: Vector2, camera: Camera3D) -> String:
 		if current < distance and current <= rule.snap_pixels:
 			nearest = rule.id
 			distance = current
-	return nearest
+		if not item_id.is_empty() and current < available_distance and current <= rule.snap_pixels and session.placement_reason(item_id, rule.id).is_empty():
+			available = rule.id
+			available_distance = current
+	return available if not available.is_empty() else nearest

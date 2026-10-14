@@ -40,6 +40,7 @@ func _ready() -> void:
 	room.bind(session)
 	rig = CameraController.new()
 	add_child(rig)
+	rig.animated = not settings["reduced"]
 	feedback = FeedbackManager.new()
 	add_child(feedback)
 	feedback.apply_settings(settings)
@@ -53,12 +54,20 @@ func _ready() -> void:
 	interaction.message.connect(_message)
 	interaction.selected.connect(func(id: String) -> void:
 		hud.selected_id = id
+		hud.destination_id = ""
+		hud.destination_reason = ""
+		hud.refresh()
+	)
+	interaction.destination_changed.connect(func(id: String, reason: String) -> void:
+		hud.destination_id = id
+		hud.destination_reason = reason
 		hud.refresh()
 	)
 	interaction.stroke_finished.connect(_stroke_finished)
 	session.action_applied.connect(_action)
 	session.changed.connect(_changed)
 	hud.request_clean.connect(_toggle_clean)
+	hud.request_cancel.connect(func() -> void: interaction.cancel())
 	hud.request_undo.connect(func() -> void:
 		interaction.cancel()
 		if session.undo():
@@ -129,20 +138,27 @@ func _save() -> void:
 
 func _hint() -> void:
 	interaction.cancel()
+	if interaction.clean_tool:
+		_toggle_clean()
 	if session.completed:
 		hud.show_message("ROOM_COMPLETE")
 		return
 	for item: ItemData in LEVEL.items:
 		if not session.placements.has(item.id):
+			var closed_target: ItemPlacementRule
 			for rule: ItemPlacementRule in LEVEL.placements:
-				if item.category in rule.categories:
-					room.select(item.id)
+				var reason: String = session.placement_reason(item.id, rule.id)
+				if reason.is_empty():
+					interaction.select_item(item.id)
 					room.highlight(rule.id)
-					if not rule.container_id.is_empty() and not session.opened[rule.container_id]:
-						hud.show_message("HINT_OPEN")
-					else:
-						hud.show_message(tr("HINT_PLACE") % [tr(item.name_key), tr(rule.name_key)])
+					hud.show_message(tr("HINT_PLACE") % [tr(item.name_key), tr(rule.name_key)])
 					return
+				if reason == "OPEN_CONTAINER_FIRST":
+					closed_target = rule
+			if closed_target != null:
+				interaction.select_item(item.id)
+				hud.show_message("HINT_OPEN")
+				return
 	if session.clean_ratio() < LEVEL.cleaning.completion_ratio:
 		hud.show_message("CLEAN_HINT")
 	elif not session.found:
@@ -174,6 +190,8 @@ func _settings_changed(values: Dictionary) -> void:
 	TranslationServer.set_locale(settings["locale"])
 	feedback.apply_settings(settings)
 	room.animated = not settings["reduced"]
+	room.refresh()
+	rig.animated = not settings["reduced"]
 	room.refresh_labels()
 	hud.refresh_text()
 	settings_timer.start()

@@ -22,6 +22,8 @@ Entrada → intención de InteractionController → validación de reglas y ries
 
 Durante un arrastre, la posición visible es provisional. El estado solo cambia al confirmar una acción válida. Cancelar recupera la ubicación anterior. La comprobación de ocupación y la aplicación del encaje suceden como una operación coherente; dos acciones no pueden ocupar un mismo hueco exclusivo.
 
+GameSession.placement_reason expone la validación sin mutación. Colocación, preview y pistas consultan esa misma función. La selección persistente permite confirmar con un segundo toque/clic; un rechazo no pierde selección. Las guías visuales no alteran capacidad ni progreso.
+
 Un rechazo comunica una causa concreta: categoría, capacidad, orientación, contenedor cerrado o riesgo. FeedbackManager presenta el resultado y nunca concede objetivos por su cuenta.
 
 ## Recursos por etapa
@@ -42,11 +44,13 @@ ScoreManager y CollectibleManager se añaden cuando el resumen y los hallazgos l
 
 ## Cámara e interacción
 
-Estados de entrada previstos: reposo, selección pendiente, arrastre, cámara, herramienta y bloqueo de interfaz/transición. Seguir el contacto que inició la interacción; cancelar correctamente al perder foco o cambiar de modo. Resolver de forma explícita la llegada de un segundo contacto.
+Estados de entrada implementados: reposo, objeto presionado, arrastre, destino presionado, toque en contenedor/coleccionable, cámara, limpieza, pinza y espera de liberación. La selección sobrevive al toque del objeto y a rechazos, y se limpia al confirmar, cancelar o cambiar herramienta. Seguir el contacto y botón que inició la interacción; cancelar correctamente al perder foco o cambiar de modo. Un segundo contacto cancela la acción provisional y pasa a pinza.
 
 Unificar mouse y touch en intenciones, evitando contar como dos acciones los eventos de emulación. HUD consume su entrada antes de interactuar con el mundo. Se usa raycasting para selección y una geometría de interacción controlada para mover y colocar.
 
 CameraController limita órbita y zoom, ofrece vistas contextuales y considera la visibilidad de objetos/destinos. La forma del diorama ayuda a evitar oclusión antes de recurrir a soluciones de cámara costosas.
+
+El arrastre conserva altura/punto de agarre del objeto. BedroomView mantiene destinos de animación: si la sesión cambia por otra causa, un tween en curso continúa. La reducción de animaciones aplica posiciones/puerta de inmediato y elimina la interpolación de transición de cámara.
 
 ## Limpieza
 

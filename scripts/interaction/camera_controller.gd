@@ -7,6 +7,7 @@ var pitch: float = deg_to_rad(48.0)
 var target: Vector3 = Vector3(0, 0.9, 0)
 var desired_target: Vector3 = Vector3(0, 0.9, 0)
 var desired_size: float = 13.0
+var animated: bool = true
 
 func _ready() -> void:
 	camera = Camera3D.new()
@@ -20,7 +21,7 @@ func _ready() -> void:
 	_update_camera()
 
 func _process(delta: float) -> void:
-	var blend: float = 1.0 - exp(-10.0 * delta)
+	var blend: float = 1.0 - exp(-10.0 * delta) if animated else 1.0
 	target = target.lerp(desired_target, blend)
 	camera.size = lerpf(camera.size, desired_size, blend)
 	_update_camera()

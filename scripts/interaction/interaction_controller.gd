@@ -3,6 +3,7 @@ extends Node
 
 signal message(key: String, positive: bool)
 signal selected(item_id: String)
+signal destination_changed(target_id: String, reason: String)
 signal stroke_finished
 
 var session: GameSession
@@ -12,6 +13,7 @@ var hud: GameHUD
 var clean_tool: bool = false
 var mode: String = "idle"
 var active_pointer: int = -2
+var active_mouse_button: MouseButton = MOUSE_BUTTON_NONE
 var touches: Dictionary[int, Vector2] = {}
 var press_position: Vector2
 var last_position: Vector2
@@ -20,6 +22,8 @@ var tap_kind: String = ""
 var tap_id: String = ""
 var previous_uv: Vector2 = Vector2(-1, -1)
 var brush: MeshInstance3D
+var drag_height: float = 0.0
+var drag_offset: Vector3 = Vector3.ZERO
 
 func configure(state: GameSession, room: BedroomView, camera_rig: CameraController, interface: GameHUD) -> void:
 	session = state
@@ -33,7 +37,7 @@ func _input(event: InputEvent) -> void:
 	# Continuing gestures own their release even when crossing a UI panel.
 	if event is InputEventMouse and event.device == InputEvent.DEVICE_ID_EMULATION:
 		return
-	if event is InputEventMouseButton and not event.pressed and active_pointer == -1:
+	if event is InputEventMouseButton and not event.pressed and active_pointer == -1 and event.button_index == active_mouse_button:
 		_release(event.position)
 		get_viewport().set_input_as_handled()
 	elif event is InputEventMouseMotion and active_pointer == -1:
@@ -79,6 +83,8 @@ func _unhandled_input(event: InputEvent) -> void:
 	if event is InputEventMouse and event.device == InputEvent.DEVICE_ID_EMULATION:
 		return
 	if event is InputEventKey and event.pressed and not event.echo:
+		if hud.settings_overlay.visible and event.keycode != KEY_ESCAPE:
+			return
 		match event.keycode:
 			KEY_ESCAPE:
 				cancel()
@@ -99,6 +105,7 @@ func _unhandled_input(event: InputEvent) -> void:
 			rig.zoom(0.6)
 		elif event.button_index in [MOUSE_BUTTON_LEFT, MOUSE_BUTTON_RIGHT] and active_pointer == -2:
 			active_pointer = -1
+			active_mouse_button = event.button_index
 			_press(event.position, event.button_index == MOUSE_BUTTON_RIGHT)
 		get_viewport().set_input_as_handled()
 	elif event is InputEventScreenTouch and event.pressed and touches.is_empty() and not hud.blocks(event.position):
@@ -117,6 +124,14 @@ func _press(position: Vector2, orbit_only: bool = false) -> void:
 	var query: PhysicsRayQueryParameters3D = PhysicsRayQueryParameters3D.create(origin, origin + rig.camera.project_ray_normal(position) * 50.0, 31)
 	var hit: Dictionary = view.get_world_3d().direct_space_state.intersect_ray(query)
 	if hit.is_empty():
+		if not selected_item.is_empty() and not clean_tool:
+			var target_id: String = view.nearest_target(position, rig.camera, selected_item)
+			if not target_id.is_empty():
+				mode = "destination"
+				tap_id = target_id
+				_preview_destination(target_id)
+				return
+		select_item("")
 		return
 	var body: StaticBody3D = hit["collider"]
 	var kind: String = body.get_meta("kind", "")
@@ -129,31 +144,43 @@ func _press(position: Vector2, orbit_only: bool = false) -> void:
 		else:
 			message.emit("CLEAN_HINT", false)
 		return
+	# An item already sitting in a destination must not steal that destination's tap.
+	if kind == "item" and not selected_item.is_empty() and id != selected_item and session.placements.has(id):
+		mode = "destination"
+		tap_id = session.placements[id]
+		_preview_destination(tap_id)
+		return
 	match kind:
 		"item":
-			selected_item = id
+			# Freeze a returning object as soon as it is grabbed, before the drag threshold.
+			if view.motion_tweens.has(id) and view.motion_tweens[id].is_valid():
+				view.motion_tweens[id].kill()
+			select_item(id)
 			mode = "selected"
-			view.select(id)
-			selected.emit(id)
+		"target":
+			if not selected_item.is_empty():
+				mode = "destination"
+				tap_id = id
+				_preview_destination(id)
 		"container", "collectible":
 			tap_kind = kind
 			tap_id = id
 			mode = "tap"
 
 func _move(position: Vector2) -> void:
-	if mode in ["selected", "tap"] and position.distance_to(press_position) > 7.0:
+	if mode in ["selected", "tap", "destination"] and position.distance_to(press_position) > 7.0:
 		mode = "drag" if mode == "selected" else "camera"
 		if mode == "drag":
 			if view.motion_tweens.has(selected_item) and view.motion_tweens[selected_item].is_valid():
 				view.motion_tweens[selected_item].kill()
 			view.item_nodes[selected_item].collision_layer = 0
+			drag_height = view.item_nodes[selected_item].global_position.y
+			drag_offset = view.item_nodes[selected_item].global_position - rig.project_to_height(press_position, drag_height)
+		else:
+			_preview_destination("")
 	if mode == "drag":
-		view.item_nodes[selected_item].global_position = rig.project_to_height(position, 1.5)
-		var target_id: String = view.nearest_target(position, rig.camera)
-		var valid: bool = false
-		if not target_id.is_empty():
-			valid = session.level.item(selected_item).category in session.level.placement(target_id).categories
-		view.highlight(target_id, valid)
+		view.item_nodes[selected_item].global_position = rig.project_to_height(position, drag_height) + drag_offset
+		_preview_destination(view.nearest_target(position, rig.camera, selected_item))
 	elif mode == "camera":
 		rig.orbit(position - last_position)
 	elif mode == "clean":
@@ -175,12 +202,11 @@ func _clean(position: Vector2) -> void:
 
 func _release(position: Vector2) -> void:
 	if mode == "drag":
-		var target_id: String = view.nearest_target(position, rig.camera)
-		var reason: String = session.place(selected_item, target_id)
+		_place(view.nearest_target(position, rig.camera, selected_item))
+	elif mode == "destination":
+		_place(tap_id)
+	elif mode == "selected":
 		view.refresh()
-		message.emit("PLACED" if reason.is_empty() else reason, reason.is_empty())
-		view.select("")
-		selected.emit("")
 	elif mode == "tap":
 		if tap_kind == "container":
 			if session.toggle_container(tap_id):
@@ -193,22 +219,43 @@ func _release(position: Vector2) -> void:
 			message.emit("CLEAN_DONE", true)
 	_cancel_state()
 
+func select_item(item_id: String) -> void:
+	selected_item = item_id
+	view.select(item_id)
+	selected.emit(item_id)
+	destination_changed.emit("", "")
+
+func _preview_destination(target_id: String) -> void:
+	var reason: String = "" if target_id.is_empty() else session.placement_reason(selected_item, target_id)
+	view.highlight(target_id, reason.is_empty())
+	destination_changed.emit(target_id, reason)
+
+func _place(target_id: String) -> void:
+	var reason: String = session.place(selected_item, target_id)
+	view.refresh()
+	message.emit("PLACED" if reason.is_empty() else reason, reason.is_empty())
+	if reason.is_empty():
+		select_item("")
+
 func cancel(clear_touches: bool = true) -> void:
-	if mode == "drag":
+	if mode in ["drag", "selected"]:
 		view.refresh()
 	if mode == "clean":
 		stroke_finished.emit()
 	if clear_touches:
 		touches.clear()
+	select_item("")
 	_cancel_state()
 
 func _cancel_state() -> void:
 	mode = "idle"
 	active_pointer = -2
+	active_mouse_button = MOUSE_BUTTON_NONE
 	previous_uv = Vector2(-1, -1)
 	if brush != null:
 		brush.visible = false
 	view.highlight("")
+	destination_changed.emit("", "")
 
 func _notification(what: int) -> void:
 	if what == NOTIFICATION_APPLICATION_FOCUS_OUT and session != null:

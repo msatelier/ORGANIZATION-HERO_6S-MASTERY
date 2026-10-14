@@ -1,6 +1,7 @@
 param(
     [string]$GodotExecutable = 'C:\Dev\Godot\4.7.2\Godot_v4.7.2-stable_win64_console.exe',
     [switch]$Android,
+    [switch]$Graphics,
     [string]$JavaHome = 'C:\Dev\GameDevelopment\Tools\Java\jdk-17.0.20.1+1',
     [string]$AndroidBuildTools = 'C:\Dev\GameDevelopment\Tools\AndroidSdk\build-tools\36.0.0'
 )
@@ -26,6 +27,11 @@ Invoke-ExportCheck -Name 'export-windows' -Arguments @('--headless', '--path', $
 $taskPack = Join-Path $taskBuild 'OrganizationHero.pck'
 Invoke-ExportCheck -Name 'export-data' -Arguments @('--headless', '--main-pack', $taskPack, '--script', (Join-Path $taskProject 'tests\export_data_tests.gd'))
 Invoke-ExportCheck -Name 'packed-run' -Arguments @('--headless', '--main-pack', $taskPack, '--quit-after', '60', '--', '--no-save')
+if ($Graphics) {
+    $taskSaveDirectory = 'user://packed-input-' + [Guid]::NewGuid().ToString('N')
+    $taskPreviewDirectory = (Join-Path $taskBuild 'previews-packed').Replace('\', '/')
+    Invoke-ExportCheck -Name 'input-packed' -Arguments @('--main-pack', $taskPack, '--script', (Join-Path $taskProject 'tests\interaction_smoke.gd'), '--', "--save-dir=$taskSaveDirectory", "--preview-dir=$taskPreviewDirectory")
+}
 if ($Android) {
     $taskApk = Join-Path $taskBuild 'OrganizationHero-debug.apk'
     Invoke-ExportCheck -Name 'export-android' -Arguments @('--headless', '--path', $taskProject, '--export-debug', 'Android', $taskApk)

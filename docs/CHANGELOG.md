@@ -1,5 +1,17 @@
 # Historial de cambios
 
+## 2026-10-13 — 0.1.1: controles y animaciones
+
+- Colocación con dos toques o clics: seleccionar objeto y después destino.
+- Guías de destinos disponibles, cantidad de lugares libres y motivo de rechazo durante el arrastre; un rechazo conserva la selección para reintentar.
+- Pistas que consideran apertura/capacidad y seleccionan un objeto accionable.
+- Arrastre conserva el punto de agarre. Se pausa una animación al agarrar el objeto y solo el botón que inició el gesto puede terminarlo.
+- Cancelar limpia selección, guías y estado del puntero; botón contextual para hacerlo también sin teclado.
+- Puerta animada; reducción de animaciones aplicada también a puerta/cámara. Los cambios de estado conservan animaciones en curso cuando el destino no cambió.
+- La textura de suciedad se actualiza solo al cambiar cobertura o vista antes/después.
+- 55 comprobaciones de dominio, 49 por renderizador/paquete y 5 de datos exportados, sin fallos. Windows y APK debug regenerados; verificación del ciclo del PCK disponible con export-prototype.ps1 -Graphics.
+- Se conserva esquema de progreso y versión de contenido 1. Pruebas humanas y móviles físicas pendientes.
+
 ## 2026-10-13 — Primer dormitorio jugable
 
 - Base Godot 4.7.2, Resources tipados y escena integrada.

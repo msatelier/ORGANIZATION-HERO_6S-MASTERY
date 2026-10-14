@@ -19,7 +19,7 @@ La exportación correcta no prueba experiencia ni rendimiento. La ejecución hea
 | 1 | Proyecto abre sin errores | Importación limpia y análisis de scripts | Verificado, también en copia sin caché |
 | 2 | Escena principal ejecuta | Arranque headless y arranque gráfico | Verificado desde fuente, paquete y ejecutable |
 | 3 | Cámara con mouse y touch | Órbita, pinza, límites, transición y retorno | Simulación verificada; touch físico pendiente |
-| 4 | Seleccionar y mover | Arrastre, cancelación, UI y selección con oclusión | Verificado por entrada y revisión visual |
+| 4 | Seleccionar y mover | Arrastre, dos toques, cancelación, UI y selección con oclusión | Verificado por entrada y revisión visual en PC |
 | 5 | Encaje valida reglas | Categoría, capacidad, orientación, tolerancia y destinos alternativos | Verificado por reglas e integración |
 | 6 | Acción inválida comprensible | Motivo correcto y estado sin corrupción | Feedback/estado verificados; comprensión humana pendiente |
 | 7 | Limpieza modifica superficie | Trayectoria, cobertura distinta, bordes y visual | Verificado en ambos renderizadores y paquete |
@@ -37,6 +37,10 @@ La exportación correcta no prueba experiencia ni rendimiento. La ejecución hea
 - Dos ubicaciones aceptan el mismo objeto cuando sus categorías/reglas lo permiten.
 - Un destino ocupado o contenedor cerrado rechaza sin perder ni duplicar el objeto.
 - Cancelar arrastre o perder foco restaura el estado previo.
+- Selección con dos toques/clics usa las mismas reglas, conserva selección si se rechaza y la limpia al confirmar/cancelar.
+- Un destino con objetos colocados sigue recibiendo el toque; lleno, cerrado o de otra categoría se comunica correctamente.
+- Un botón ajeno no termina el gesto activo; el objeto conserva el punto de agarre, incluso si estaba volviendo con animación.
+- Las pistas prefieren destinos disponibles y la reducción de animaciones aplica también a puerta/cámara.
 - Un objetivo dependiente espera; otro independiente permanece accionable.
 - Se detectan IDs duplicados, referencias desconocidas y ciclos de objetivos.
 - Resolver un riesgo cambia las condiciones pertinentes; no completa tareas ajenas.
@@ -70,5 +74,7 @@ No hay Android disponible. No se comprobó iOS. El simulador o el escritorio pue
 ## Automatización y trazabilidad
 
 Runner GDScript implementado: tests/domain_tests.gd para headless y tests/interaction_smoke.gd para ventana real. tests/export_data_tests.gd verifica datos del paquete. tools/verify.ps1 y tools/export-prototype.ps1 comprueban salida y errores de registros. No se usa un framework adicional. Automatizar validadores, reglas, progresión y persistencia; documentar el comando, código de salida y registros cuando se implemente. GitHub Actions puede importar/analizar y ejecutar esas pruebas con Godot 4.7.2 fijado. No existe aún workflow de CI.
+
+0.1.1: 55 comprobaciones de dominio, 49 de integración por renderizador y sobre PCK, 5 de datos exportados. export-prototype.ps1 -Graphics recorre el paquete exportado. Los recorridos del juego usan guardados aislados; no reemplazan la partida del jugador. La comprobación de copia sin caché pertenece a 0.1.0.
 
 Registrar cada resultado con commit, prueba, plataforma, resultado, evidencia y defecto asociado. Solo marcar «verificado» lo efectivamente ejecutado. La lista de pendientes no bloquea el avance de tareas independientes, pero debe acompañar la entrega.

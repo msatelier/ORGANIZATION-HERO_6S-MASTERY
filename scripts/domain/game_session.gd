@@ -22,7 +22,8 @@ func _init(definition: LevelData) -> void:
 	for container: ContainerData in level.containers:
 		opened[container.id] = false
 
-func place(item_id: String, target_id: String, yaw: float = 0.0) -> String:
+func placement_reason(item_id: String, target_id: String, yaw: float = 0.0) -> String:
+	# Preview and commit share the same rules without mutating the session.
 	if completed:
 		return "LEVEL_FINISHED"
 	var item: ItemData = level.item(item_id)
@@ -37,6 +38,13 @@ func place(item_id: String, target_id: String, yaw: float = 0.0) -> String:
 		return reason
 	if placements.get(item_id, "") == target_id:
 		return "ALREADY_PLACED"
+	return ""
+
+func place(item_id: String, target_id: String, yaw: float = 0.0) -> String:
+	var reason: String = placement_reason(item_id, target_id, yaw)
+	if not reason.is_empty():
+		return reason
+	var rule: ItemPlacementRule = level.placement(target_id)
 	undo_stack.append({"placements": placements.duplicate(), "slots": slots.duplicate()})
 	var chosen_slot: int = 0
 	var used: Array[int] = []

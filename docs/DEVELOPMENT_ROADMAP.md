@@ -1,6 +1,6 @@
 # Hoja de ruta y backlog inicial
 
-Fecha: 13 de octubre de 2026. Actualizada tras el primer prototipo. Hitos por resultado; sin calendario comercial comprometido.
+Fecha: 13 de octubre de 2026. Actualizada tras el refinamiento 0.1.1. Hitos por resultado; sin calendario comercial comprometido.
 
 | Hito | Fase del prompt | Resultado | Estado |
 | --- | --- | --- | --- |
@@ -8,7 +8,7 @@ Fecha: 13 de octubre de 2026. Actualizada tras el primer prototipo. Hitos por re
 | M1: interacción fundamental | 1 | Cámara, objeto y destinos con reglas | Comprobado en PC; touch físico pendiente |
 | M2: tareas del dormitorio | 1 | Clasificación, contenedor, limpieza, seguridad y coleccionable | Implementado y comprobado en PC |
 | M3: ciclo completo | 1 | Objetivos, final, resumen, antes/después y reanudación | Prototipo completo comprobado desde fuente y paquete |
-| M4: calidad y validación | 2 y cierre de 1 | Controles refinados, presentación y evidencia móvil | Pendiente; sin dispositivo Android |
+| M4: calidad y validación | 2 y cierre de 1 | Controles refinados, presentación y evidencia móvil | En progreso: controles/animación comprobados en PC; arte/audio, jugadores y móvil pendientes |
 | M5: casa ampliada | 3 | Cocina reutilizable, luego otros tres escenarios | Pendiente |
 | M6: fábrica y retos | 4 | Escenarios industriales y desafío opcional | Pendiente |
 | M7: comercialización | 5 | Servicios comerciales y entregas para tiendas | Pendiente |
@@ -63,6 +63,8 @@ Cierre: cada acción modifica estado, representación y objetivos previstos. Fro
 Cierre: completar de principio a fin, reiniciar la aplicación y recuperar progreso coherente; pruebas críticas pasan. Las limitaciones de hardware permanecen visibles.
 
 ## M4 — Refinamiento y evidencia
+
+Realizado en 0.1.1: colocación con dos toques/clics, guías de capacidad, pistas disponibles, agarre estable, cancelación, puerta animada y reducción aplicada a la cámara. Regresión completa desde fuente y paquete comprobada en PC. Es una ronda de refinamiento; M4 continúa abierto.
 
 - Sustituir recursos provisionales prioritarios con autoría/licencia registrada.
 - Ajustar controles, animaciones, iluminación, audio y claridad de tareas.

@@ -1,6 +1,6 @@
 # Organization Hero: 6S Mastery
 
-Primer prototipo jugable de organización y limpieza en un dormitorio 3D. Godot **4.7.2**, GDScript tipado, modo Relax, español e inglés.
+Prototipo jugable **0.1.1** de organización y limpieza en un dormitorio 3D. Godot **4.7.2**, GDScript tipado, modo Relax, español e inglés.
 
 ![Dormitorio al empezar](docs/images/bedroom-before.png)
 
@@ -10,7 +10,8 @@ Primer prototipo jugable de organización y limpieza en un dormitorio 3D. Godot 
 
 **Versión Windows local:** ejecutar `build/OrganizationHero.exe`. Mantener `OrganizationHero.pck` en la misma carpeta. Los binarios se generan con el comando de exportación indicado abajo y no se versionan en Git.
 
-- Arrastrar objetos hacia su destino: libros, ropa, reciclaje y juguetes.
+- Arrastrar objetos hacia su destino o tocar primero el objeto y después su lugar: libros, ropa, reciclaje y juguetes.
+- Al seleccionar, los destinos disponibles muestran un borde dorado y sus lugares libres. Un rechazo conserva la selección para volver a intentar. El botón «Cancelar selección» permite salir con mouse o touch.
 - Tocar el armario para abrirlo. La ropa también puede ir al cesto.
 - Arrastrar el fondo o usar botón derecho para girar la cámara; rueda para zoom.
 - En touch: arrastrar y usar dos contactos para pinza/orbitar.
@@ -23,7 +24,7 @@ Atajos: **C** paño, **U** deshacer, **Espacio** vista general, **Esc** cancelar
 
 ## Qué funciona
 
-Ocho objetos, cinco destinos con categorías/capacidad/tolerancia, armario interactivo, dos destinos válidos para ropa, selección/arrastre/cancelación, deshacer organización, limpieza espacial progresiva, riesgo simple de tropiezo, hallazgo oculto, objetivos, pistas, resultados con puntuación/estrellas, comparación y repetición.
+Ocho objetos, cinco destinos con categorías/capacidad/tolerancia, armario con puerta animada, dos destinos válidos para ropa, selección/arrastre/colocación con dos toques/cancelación, deshacer organización, limpieza espacial progresiva, riesgo simple de tropiezo, hallazgo oculto, objetivos, pistas que eligen destinos disponibles, resultados con puntuación/estrellas, comparación y repetición. Reducir animaciones afecta objetos, puerta y transición de cámara.
 
 Progreso JSON versionado con temporal y respaldo bajo `user://`. Ajustes separados. Las versiones futuras de progreso se conservan sin sobrescribir. Audio sintetizado de prototipo y feedback visual básico; sin SDK comerciales.
 
@@ -34,12 +35,14 @@ Desde PowerShell, con Godot 4.7.2 instalado:
 ```powershell
 .\tools\verify.ps1
 .\tools\verify.ps1 -Graphics
-.\tools\export-prototype.ps1 -Android
+.\tools\export-prototype.ps1 -Android -Graphics
 ```
 
 Se puede indicar `-GodotExecutable` si está en otra ruta. Android requiere JDK/SDK, plantillas coincidentes y configuración Android del editor. VS Code incluye configuración para la instalación local; sus rutas se ajustan en otras computadoras. La depuración interactiva de VS Code aún no se verificó.
 
-Resultados: **52 comprobaciones de reglas/persistencia**, **34 de integración en Mobile**, **34 en Compatibility**, **34 sobre el paquete exportado** y **5 de datos exportados**, sin fallos. Importación de copia limpia, arranque y firma APK verificados. Las pruebas gráficas simulan eventos mediante la entrada del motor; no equivalen a touch físico.
+Resultados de 0.1.1: **55 comprobaciones de reglas/persistencia**, **49 de integración en Mobile**, **49 en Compatibility**, **49 sobre el paquete exportado** y **5 de datos exportados**, sin fallos. Arranque y firma APK verificados. La importación de una copia sin caché se comprobó en 0.1.0. Las pruebas gráficas simulan eventos mediante la entrada del motor; no equivalen a touch físico.
+
+El formato de progreso y los IDs del dormitorio siguen en versión 1: las partidas de 0.1.0 continúan siendo compatibles.
 
 La conversión de Resources a binario se desactiva porque, en la exportación probada, vaciaba categorías/posiciones. La regresión se comprueba contra el paquete, además de probar desde el editor.
 

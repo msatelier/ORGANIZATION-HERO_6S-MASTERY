@@ -41,12 +41,39 @@ func _run() -> void:
 	check(app.hud.title.text == "ORGANIZATION HERO", "main scene and HUD start")
 	check(not app.session.completed and app.session.placements.is_empty(), "fresh isolated session starts")
 	await capture("bedroom-before")
+	await touch_tap(item_screen("book_mint"))
+	check(app.interaction.selected_item == "book_mint" and app.hud.selected_id == "book_mint" and app.room.destination_guides["shelf"].visible and not app.room.destination_guides["basket"].visible, "touch selects an item and marks only available matching destinations")
+	await capture("bedroom-selection")
+	await touch_tap(target_screen("toy_box"))
+	check(app.session.placements.is_empty() and app.interaction.selected_item == "book_mint" and app.hud.toast.text == app.tr("WRONG_CATEGORY"), "invalid destination tap explains rejection and preserves selection")
+	await touch_tap(app.hud.buttons["OVERVIEW"].get_global_rect().get_center())
+	check(app.interaction.selected_item.is_empty() and app.hud.buttons["OVERVIEW"].text == app.tr("OVERVIEW"), "contextual touch cancel clears selection without requiring a keyboard")
+	await touch_tap(item_screen("book_mint"))
+	await touch_tap(target_screen("shelf"))
+	await frames(18)
+	check(app.session.placements.get("book_mint") == "shelf" and app.interaction.selected_item.is_empty(), "two touch taps place an item and clear selection")
+	await click_button("UNDO")
+	await frames(18)
+	await click_button("HINT")
+	check(app.interaction.selected_item == "shirt_gold" and app.room.hovered_target_id == "basket", "hint selects its item and chooses available basket instead of closed wardrobe")
+	key_press(KEY_ESCAPE)
+	await frames()
+	check(app.interaction.selected_item.is_empty() and app.hud.selected_id.is_empty() and not app.room.item_nodes["shirt_gold"].get_node("Selection").visible, "Escape clears both selection and world guidance")
 
 	await drag("book_mint", "toy_box")
 	check(app.session.placements.is_empty(), "mouse invalid drop preserves state")
 	await drag("shirt_gold", "basket")
 	check(app.session.placements.get("shirt_gold") == "basket", "mouse drag snaps to valid alternate target")
+	await touch_tap(item_screen("shirt_coral"))
+	await touch_tap(target_screen("basket"))
+	await frames(18)
+	check(app.session.placements.get("shirt_coral") == "basket", "occupied item does not steal second destination tap")
+	await touch_tap(item_screen("sock_blue"))
+	await touch_tap(target_screen("basket"))
+	check(app.session.placements.size() == 2 and app.hud.toast.text == app.tr("TARGET_FULL") and not app.room.destination_guides["basket"].visible, "full basket rejects touch placement and offers no availability guide")
 	await click_button("UNDO")
+	await click_button("UNDO")
+	await frames(18)
 	check(not app.session.placements.has("shirt_gold"), "UI undo reverses placement")
 	var cancellation_from: Vector2 = app.rig.camera.unproject_position(app.room.item_nodes["shirt_gold"].global_position)
 	touch_event(0, cancellation_from, true)
@@ -60,6 +87,22 @@ func _run() -> void:
 	Input.parse_input_event(cancellation)
 	await frames(18)
 	check(app.interaction.mode == "idle" and app.session.placements.is_empty(), "canceled touch restores object instead of committing drop")
+	check(app.interaction.selected_item.is_empty() and not app.room.destination_guides["basket"].visible, "canceled touch clears stale selection and destination guides")
+	var anchor_from: Vector2 = item_screen("shirt_gold") + Vector2(5, 0)
+	mouse_button(anchor_from, true)
+	await frames()
+	mouse_motion(anchor_from + Vector2(15, 0))
+	await frames()
+	var anchor_error: float = item_screen("shirt_gold").distance_to(anchor_from + Vector2(10, 0))
+	check(anchor_error < 1.5, "drag keeps original grab offset without jumping to a higher plane (error %.2f px)" % anchor_error)
+	var wheel_release: InputEventMouseButton = InputEventMouseButton.new()
+	wheel_release.button_index = MOUSE_BUTTON_WHEEL_UP
+	wheel_release.position = anchor_from + Vector2(15, 0)
+	Input.parse_input_event(wheel_release)
+	await frames()
+	check(app.interaction.mode == "drag" and app.session.placements.is_empty(), "unrelated mouse button release cannot commit or cancel active drag")
+	key_press(KEY_ESCAPE)
+	await frames(18)
 	await touch_tap(app.hud.buttons["SETTINGS"].get_global_rect().get_center())
 	check(app.hud.settings_overlay.visible, "touch opens settings through native GUI emulation")
 	await click_button("CLOSE")
@@ -68,6 +111,20 @@ func _run() -> void:
 	var cabinet_position: Vector2 = app.rig.camera.unproject_position(app.LEVEL.containers[0].position)
 	await touch_tap(cabinet_position)
 	check(app.session.opened["cabinet"], "touch tap opens container")
+	check(app.room.door_tweens.has("cabinet") and app.room.door_tweens["cabinet"].is_running(), "container opening animates instead of teleporting the door")
+	await frames(25)
+	await click_button("SETTINGS")
+	app.hud.reduced.button_pressed = true
+	await frames()
+	check(not app.room.animated and not app.rig.animated, "reduced animations setting applies to room and camera")
+	await click_button("CLOSE")
+	await touch_tap(cabinet_position)
+	check(not app.session.opened["cabinet"] and is_zero_approx(app.room.door_nodes["cabinet"].rotation.y), "reduced animations makes container closing immediate")
+	await touch_tap(cabinet_position)
+	await click_button("SETTINGS")
+	app.hud.reduced.button_pressed = false
+	await frames()
+	await click_button("CLOSE")
 	await touch_drag("shirt_gold", "wardrobe")
 	check(app.session.placements.get("shirt_gold") == "wardrobe", "touch drag organizes item")
 
@@ -155,6 +212,21 @@ func surface_screen(uv: Vector2) -> Vector2:
 	var task: CleaningTaskData = app.LEVEL.cleaning
 	var world: Vector3 = task.position + Vector3((uv.x - 0.5) * task.size.x, 0, (uv.y - 0.5) * task.size.y)
 	return app.rig.camera.unproject_position(world)
+
+func item_screen(item_id: String) -> Vector2:
+	return app.rig.camera.unproject_position(app.room.item_nodes[item_id].global_position)
+
+func target_screen(target_id: String) -> Vector2:
+	return app.rig.camera.unproject_position(app.room.target_nodes[target_id].global_position)
+
+func key_press(key: Key) -> void:
+	var event: InputEventKey = InputEventKey.new()
+	event.keycode = key
+	event.pressed = true
+	Input.parse_input_event(event)
+	event = InputEventKey.new()
+	event.keycode = key
+	Input.parse_input_event(event)
 
 func drag(item_id: String, target_id: String) -> void:
 	var from: Vector2 = app.rig.camera.unproject_position(app.room.item_nodes[item_id].global_position)

@@ -96,3 +96,9 @@ En el paquete generado con conversión binaria, las categorías y posiciones Pac
 ## D-010: paquete Windows separado y audio de prueba
 
 Windows se exporta con PCK separado y el ejecutable del motor sin modificaciones, con arranque independiente verificado. El intento de incrustar PCK fue bloqueado por Application Control; no se cambió la política del sistema. Audio generado localmente para feedback básico y música; en headless se omite reproducción para evitar una referencia retenida al salir. Arte y audio finales siguen pendientes.
+
+## D-011: una validación para preview, pistas y colocación
+
+En 0.1.1, GameSession.placement_reason consulta las reglas sin alterar estado; place confirma después de esa consulta. Las guías y pistas consideran apertura, capacidad, categoría y orientación con la misma fuente de verdad. Colocar con dos toques/clics usa la operación existente; no añade otro formato de progreso.
+
+Se conserva selección ante rechazo y se limpia al confirmar/cancelar. Un gesto pertenece al contacto y botón que lo inició. Las animaciones mantienen su destino entre cambios ajenos; la máscara se actualiza únicamente al cambiar cobertura o comparación. Son mejoras comprobadas por entrada simulada en PC; comodidad táctil física y comprensión humana siguen pendientes.

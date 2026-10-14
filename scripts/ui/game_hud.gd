@@ -4,6 +4,7 @@ extends CanvasLayer
 signal request_clean
 signal request_undo
 signal request_overview
+signal request_cancel
 signal request_finish
 signal request_hint
 signal request_restart
@@ -39,6 +40,8 @@ var reduced: CheckButton
 var haptics: CheckButton
 var locale_choice: OptionButton
 var selected_id: String = ""
+var destination_id: String = ""
+var destination_reason: String = ""
 var using_cloth: bool = false
 var comparison_active: bool = false
 var message_timer: float = 0.0
@@ -185,7 +188,7 @@ func _build_toolbar() -> void:
 	for entry: Array in [
 		["CLOTH_TOOL", func() -> void: request_clean.emit()],
 		["UNDO", func() -> void: request_undo.emit()],
-		["OVERVIEW", func() -> void: request_overview.emit()],
+		["OVERVIEW", _overview_or_cancel],
 		["INSPECT", func() -> void: request_finish.emit()]
 	]:
 		var button: Button = _button(row, entry[0], entry[1])
@@ -197,6 +200,12 @@ func _build_toolbar() -> void:
 	toast.offset_top = -171
 	toast.offset_bottom = -138
 	toast.mouse_filter = Control.MOUSE_FILTER_IGNORE
+
+func _overview_or_cancel() -> void:
+	if selected_id.is_empty():
+		request_overview.emit()
+	else:
+		request_cancel.emit()
 
 func _build_results() -> void:
 	results_panel = _panel()
@@ -352,10 +361,16 @@ func refresh() -> void:
 	buttons["UNDO"].disabled = session.undo_stack.is_empty() or session.completed
 	buttons["INSPECT"].disabled = not session.can_finish() or session.completed
 	buttons["CLOTH_TOOL"].text = tr("PUT_CLOTH_AWAY") if using_cloth else tr("CLOTH_TOOL")
+	buttons["OVERVIEW"].text = tr("CANCEL_SELECTION") if not selected_id.is_empty() else tr("OVERVIEW")
 	if using_cloth:
 		instruction.text = tr("CLEAN_HINT") % roundi(session.level.cleaning.completion_ratio * 100)
 	elif not selected_id.is_empty():
-		instruction.text = tr(session.level.item(selected_id).name_key) + "  ·  " + tr("DRAG_HINT")
+		instruction.text = tr(session.level.item(selected_id).name_key) + "  ·  "
+		if destination_id.is_empty():
+			instruction.text += tr("DRAG_HINT")
+		else:
+			instruction.text += tr(session.level.placement(destination_id).name_key) + "  ·  "
+			instruction.text += tr("DESTINATION_READY" if destination_reason.is_empty() else destination_reason)
 	else:
 		instruction.text = tr("CONTROLS_HINT")
 	toolbar.visible = not session.completed
