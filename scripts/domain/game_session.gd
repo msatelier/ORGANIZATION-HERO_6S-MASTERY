@@ -2,7 +2,7 @@ class_name GameSession
 extends RefCounted
 
 signal changed
-signal action_applied(kind: String)
+signal action_applied(kind: String, context: Dictionary)
 
 var level: LevelData
 var placements: Dictionary[String, String] = {}
@@ -57,7 +57,7 @@ func place(item_id: String, target_id: String, yaw: float = 0.0) -> String:
 	slots[item_id] = chosen_slot
 	move_count += 1
 	changed.emit()
-	action_applied.emit("place")
+	action_applied.emit("place", {"item_id": item_id, "target_id": target_id})
 	return ""
 
 func undo() -> bool:
@@ -67,7 +67,7 @@ func undo() -> bool:
 	placements.assign(previous["placements"])
 	slots.assign(previous["slots"])
 	changed.emit()
-	action_applied.emit("undo")
+	action_applied.emit("undo", {})
 	return true
 
 func toggle_container(container_id: String) -> bool:
@@ -75,7 +75,7 @@ func toggle_container(container_id: String) -> bool:
 		return false
 	opened[container_id] = not opened[container_id]
 	changed.emit()
-	action_applied.emit("container")
+	action_applied.emit("container", {"container_id": container_id, "opened": opened[container_id]})
 	return true
 
 func clean_at(uv: Vector2, previous: Vector2 = Vector2(-1, -1)) -> int:
@@ -123,7 +123,7 @@ func discover() -> bool:
 		return false
 	found = true
 	changed.emit()
-	action_applied.emit("collectible")
+	action_applied.emit("collectible", {})
 	return true
 
 func objective_done(goal: ObjectiveData) -> bool:
@@ -153,7 +153,7 @@ func finish() -> bool:
 		return false
 	completed = true
 	changed.emit()
-	action_applied.emit("finish")
+	action_applied.emit("finish", {})
 	return true
 
 func score() -> int:

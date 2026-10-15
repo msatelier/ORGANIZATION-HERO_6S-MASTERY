@@ -1,6 +1,6 @@
 # Arquitectura técnica propuesta
 
-Fecha: 13 de octubre de 2026. Arquitectura objetivo con primer prototipo implementado. GameRoot coordina; GameSession, PlacementRules, SaveStore, CameraController, InteractionController, BedroomView, GameHUD y FeedbackManager están integrados. [Evidencia](PROTOTYPE_REPORT.md).
+Actualización: 14 de octubre de 2026. Arquitectura objetivo con prototipo 0.1.2 implementado. GameRoot coordina; GameSession, PlacementRules, SaveStore, CameraController, InteractionController, BedroomView, GameHUD y FeedbackManager están integrados. [Evidencia](PROTOTYPE_REPORT.md).
 
 ## Capas y autoridad del estado
 
@@ -25,6 +25,8 @@ Durante un arrastre, la posición visible es provisional. El estado solo cambia 
 GameSession.placement_reason expone la validación sin mutación. Colocación, preview y pistas consultan esa misma función. La selección persistente permite confirmar con un segundo toque/clic; un rechazo no pierde selección. Las guías visuales no alteran capacidad ni progreso.
 
 Un rechazo comunica una causa concreta: categoría, capacidad, orientación, contenedor cerrado o riesgo. FeedbackManager presenta el resultado y nunca concede objetivos por su cuenta.
+
+La señal action_applied lleva contexto de la acción confirmada: IDs de objeto/destino o contenedor y apertura. GameRoot consulta ItemData.sound_profile para elegir el feedback; GameSession conserva su independencia de reproducción y buses.
 
 ## Recursos por etapa
 
@@ -98,3 +100,11 @@ El árbol muestra la organización futura. La base real usa scenes/app, scripts/
 Antes de expandir, cargar una variante del dormitorio con otros IDs, cantidades y destinos. Después crear la cocina reutilizando selección, colocación, objetivos, guardado y limpieza. Si el núcleo requiere cambios para cada objeto nuevo, se revisan los contratos de datos antes de producir más habitaciones.
 
 La optimización se guía por perfilado: materiales compartidos, colisiones simples, iluminación contenida y actividad por evento. Los límites de geometría, texturas, draw calls y memoria se fijarán tras medir una escena representativa.
+
+## Arte y audio integrados en 0.1.2
+
+ItemVisuals construye siluetas extruidas y volúmenes redondeados; BedroomView conserva las colisiones declaradas por datos. MeshBatcher agrupa mallas estáticas de una superficie/material compartido con transformaciones locales; deja independientes partes interactivas, puerta, selección y etiquetas. Se construye una vez por escena y no durante cada gesto.
+
+SoundPalette crea 23 clips PCM mono, incluyendo tres variantes de cinco materiales, armario, hallazgo/final, paño y ambiente. FeedbackManager administra tres voces discretas, otra para el paño y otra para música. La entrada de limpieza emite intensidad por movimiento sobre superficie; la voz se desvanece sin eventos nuevos y al cancelar. Un único limitador de Master controla la mezcla al repetir.
+
+La síntesis sigue siendo una producción de desarrollo. El [registro de recursos](ASSET_REGISTER.md) diferencia pruebas técnicas, revisión visual y escucha humana pendiente. No se interpreta una reducción de llamadas de dibujo como aceptación del rendimiento móvil.

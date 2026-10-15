@@ -64,6 +64,7 @@ func _ready() -> void:
 		hud.refresh()
 	)
 	interaction.stroke_finished.connect(_stroke_finished)
+	interaction.cleaning_motion.connect(feedback.cleaning_motion)
 	session.action_applied.connect(_action)
 	session.changed.connect(_changed)
 	hud.request_clean.connect(_toggle_clean)
@@ -115,8 +116,14 @@ func _message(key: String, positive: bool) -> void:
 	if not positive:
 		feedback.play("invalid")
 
-func _action(kind: String) -> void:
-	feedback.play(kind)
+func _action(kind: String, context: Dictionary) -> void:
+	if kind == "place":
+		var item: ItemData = LEVEL.item(context["item_id"])
+		feedback.play(kind, item.sound_profile)
+	elif kind == "container":
+		feedback.play("container_open" if context["opened"] else "container_close")
+	else:
+		feedback.play(kind)
 	_save()
 
 func _changed() -> void:
@@ -126,7 +133,6 @@ func _changed() -> void:
 
 func _stroke_finished() -> void:
 	_save()
-	feedback.play("clean")
 
 func _save() -> void:
 	if not saving_enabled:

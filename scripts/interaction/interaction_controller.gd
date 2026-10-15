@@ -5,6 +5,7 @@ signal message(key: String, positive: bool)
 signal selected(item_id: String)
 signal destination_changed(target_id: String, reason: String)
 signal stroke_finished
+signal cleaning_motion(intensity: float)
 
 var session: GameSession
 var view: BedroomView
@@ -24,6 +25,7 @@ var previous_uv: Vector2 = Vector2(-1, -1)
 var brush: MeshInstance3D
 var drag_height: float = 0.0
 var drag_offset: Vector3 = Vector3.ZERO
+var last_clean_time: int = 0
 
 func configure(state: GameSession, room: BedroomView, camera_rig: CameraController, interface: GameHUD) -> void:
 	session = state
@@ -193,12 +195,21 @@ func _clean(position: Vector2) -> void:
 	var uv: Vector2 = Vector2((point.x - task.position.x) / task.size.x + 0.5, (point.z - task.position.z) / task.size.y + 0.5)
 	if uv.x < 0 or uv.x > 1 or uv.y < 0 or uv.y > 1:
 		previous_uv = Vector2(-1, -1)
+		last_clean_time = 0
 		brush.visible = false
+		cleaning_motion.emit(0.0)
 		return
 	brush.position = point + Vector3(0, 0.045, 0)
 	brush.visible = true
+	var now: int = Time.get_ticks_usec()
+	var speed: float = 0.0
+	if previous_uv.x >= 0 and last_clean_time > 0:
+		var seconds: float = maxf(0.008, float(now - last_clean_time) / 1000000.0)
+		speed = ((uv - previous_uv) * task.size).length() / seconds
+	cleaning_motion.emit(clampf(speed * 0.4, 0, 1))
 	session.clean_at(uv, previous_uv)
 	previous_uv = uv
+	last_clean_time = now
 
 func _release(position: Vector2) -> void:
 	if mode == "drag":
@@ -252,6 +263,8 @@ func _cancel_state() -> void:
 	active_pointer = -2
 	active_mouse_button = MOUSE_BUTTON_NONE
 	previous_uv = Vector2(-1, -1)
+	last_clean_time = 0
+	cleaning_motion.emit(0.0)
 	if brush != null:
 		brush.visible = false
 	view.highlight("")

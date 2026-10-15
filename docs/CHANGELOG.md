@@ -1,5 +1,18 @@
 # Historial de cambios
 
+## 2026-10-14 — 0.1.2: arte y sonido por material
+
+- Siluetas de prendas y medias mediante polígonos extruidos; peluche redondeado con patas, orejas, hocico y lazo.
+- Libros con cubiertas/páginas, botella etiquetada y papel con detalles.
+- Cortinas, planta, lámpara, manta y alfombra; iluminación ajustada sin añadir luces ni efectos exclusivos.
+- Agrupación de geometría estática por material, conservando colisiones y partes interactivas. Contador puntual en PC: 148/232 draw calls frente a 187/294 de 0.1.1; sin acreditar FPS móviles.
+- Cinco perfiles sonoros con tres variantes; apertura/cierre, hallazgo, final y ambiente renovados. Clips sintetizados propios.
+- Roce continuo del paño según movimiento, con silencio al detener, salir de la superficie o cancelar. Voz independiente y volumen por bus.
+- Contexto de acciones identifica objeto/destino o estado del contenedor; las reglas permanecen independientes del audio.
+- Un limitador en Master evita picos de mezcla y no se duplica al repetir.
+- 58 comprobaciones de dominio, 30 de recursos, 64 por renderizador/paquete y 6 de exportación, sin fallos. Muestra WAV local y registro de procedencia.
+- Esquema, IDs, ubicaciones y objetivos conservados. Escucha humana, touch físico y rendimiento móvil pendientes.
+
 ## 2026-10-13 — 0.1.1: controles y animaciones
 
 - Colocación con dos toques o clics: seleccionar objeto y después destino.

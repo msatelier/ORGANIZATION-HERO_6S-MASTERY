@@ -1,6 +1,6 @@
 # Decisiones técnicas y auditoría inicial
 
-Fecha: 13 de octubre de 2026. Auditoría inicial y decisiones de implementación. Los resultados actuales están en [PROTOTYPE_REPORT.md](PROTOTYPE_REPORT.md).
+Actualización: 14 de octubre de 2026. Auditoría inicial y decisiones de implementación. Los resultados actuales están en [PROTOTYPE_REPORT.md](PROTOTYPE_REPORT.md).
 
 ## Inspección del repositorio
 
@@ -102,3 +102,11 @@ Windows se exporta con PCK separado y el ejecutable del motor sin modificaciones
 En 0.1.1, GameSession.placement_reason consulta las reglas sin alterar estado; place confirma después de esa consulta. Las guías y pistas consideran apertura, capacidad, categoría y orientación con la misma fuente de verdad. Colocar con dos toques/clics usa la operación existente; no añade otro formato de progreso.
 
 Se conserva selección ante rechazo y se limpia al confirmar/cancelar. Un gesto pertenece al contacto y botón que lo inició. Las animaciones mantienen su destino entre cambios ajenos; la máscara se actualiza únicamente al cambiar cobertura o comparación. Son mejoras comprobadas por entrada simulada en PC; comodidad táctil física y comprensión humana siguen pendientes.
+
+## D-012: formas propias, geometría agrupada y audio por datos
+
+0.1.2 mantiene colisiones/posiciones/objetivos y renueva la representación con siluetas extruidas y primitivas redondeadas. ItemVisuals y MeshBatcher viven en presentación; el agrupado solo afecta mallas estáticas que comparten material y movimiento, con exclusiones explícitas. El contador puntual de draw calls bajó de 187/294 a 148/232 en PC, aunque cambió también la geometría. FPS, arranque y memoria móviles quedan sin acreditar.
+
+ItemData.sound_profile permite escoger tela, papel, plástico, blando o madera sin condicionar las reglas. La señal de acción confirmada lleva IDs/contexto y GameRoot hace la conexión. SoundPalette sintetiza clips propios con variantes, envolventes y bucles; el paño tiene una voz independiente que depende de movimiento y se desvanece. Un limitador único en Master limita picos al mezclar. Se evita una dependencia de bancos externos durante esta ronda; escucha humana y calidad ASMR definitiva siguen abiertas.
+
+Los nuevos campos visuales/sonoros no se guardan en el progreso. Esquema y versión de contenido permanecen en 1; no cambia la solución del nivel ni se requiere migración de 0.1.0/0.1.1.

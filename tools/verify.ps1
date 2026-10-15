@@ -26,6 +26,7 @@ function Invoke-GameCheck {
 Invoke-GameCheck -Name 'import' -Arguments @('--headless', '--path', $taskProject, '--editor', '--import', '--quit')
 Invoke-GameCheck -Name 'run' -Arguments @('--headless', '--path', $taskProject, '--quit-after', '60', '--', '--no-save')
 Invoke-GameCheck -Name 'domain' -Arguments @('--headless', '--path', $taskProject, '--script', 'tests/domain_tests.gd')
+Invoke-GameCheck -Name 'assets' -Arguments @('--headless', '--path', $taskProject, '--script', 'tests/asset_tests.gd')
 if ($Graphics) {
     foreach ($taskRenderer in @('mobile', 'gl_compatibility')) {
         $taskSaveDirectory = 'res://build/input-' + [Guid]::NewGuid().ToString('N')

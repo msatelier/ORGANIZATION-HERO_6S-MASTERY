@@ -64,6 +64,7 @@ func _run() -> void:
 	check(app.session.placements.is_empty(), "mouse invalid drop preserves state")
 	await drag("shirt_gold", "basket")
 	check(app.session.placements.get("shirt_gold") == "basket", "mouse drag snaps to valid alternate target")
+	check(app.feedback.last_clip_key.begins_with("place_fabric_"), "clothing placement routes to fabric sound")
 	await touch_tap(item_screen("shirt_coral"))
 	await touch_tap(target_screen("basket"))
 	await frames(18)
@@ -111,6 +112,7 @@ func _run() -> void:
 	var cabinet_position: Vector2 = app.rig.camera.unproject_position(app.LEVEL.containers[0].position)
 	await touch_tap(cabinet_position)
 	check(app.session.opened["cabinet"], "touch tap opens container")
+	check(app.feedback.last_clip_key == "container_open", "opening container routes to opening sound")
 	check(app.room.door_tweens.has("cabinet") and app.room.door_tweens["cabinet"].is_running(), "container opening animates instead of teleporting the door")
 	await frames(25)
 	await click_button("SETTINGS")
@@ -152,12 +154,34 @@ func _run() -> void:
 				break
 		await drag(item.id, target)
 		check(app.session.placements.get(item.id) == target, "input placement: " + item.id)
+		check(app.feedback.last_clip_key.begins_with("place_" + item.sound_profile + "_"), "placement sound matches material: " + item.id)
 	check(app.session.hazard_safe() and app.room.collectible_node.visible, "cleared walkway reveals golden keepsake")
 	await mouse_click(app.rig.camera.unproject_position(app.room.collectible_node.global_position))
 	check(app.session.found, "click discovers collectible")
 	await touch_tap(app.hud.buttons["CLOTH_TOOL"].get_global_rect().get_center())
 	await frames(60)
 	check(app.interaction.clean_tool, "touch UI activates cleaning mode without duplicate world input")
+	var audio_point: Vector2 = surface_screen(Vector2(0.25, 0.5))
+	mouse_button(audio_point, true)
+	await frames(2)
+	check(app.feedback.brush_target == 0, "stationary cloth press has no continuous sound")
+	mouse_motion(surface_screen(Vector2(0.65, 0.5)))
+	await frames(2)
+	check(app.feedback.brush_target > 0 and app.feedback.brush.playing, "cloth movement drives audible surface feedback")
+	await create_timer(0.35).timeout
+	check(not app.feedback.brush.playing and app.feedback.brush_gain == 0, "stationary cloth fades to silence without new motion")
+	mouse_motion(surface_screen(Vector2(0.8, 0.5)))
+	await frames(2)
+	key_press(KEY_ESCAPE)
+	await create_timer(0.2).timeout
+	check(not app.feedback.brush.playing and app.interaction.mode == "idle", "canceling cleaning stops continuous sound")
+	await click_button("SETTINGS")
+	app.hud.effects_slider.value = 0
+	await frames()
+	check(AudioServer.is_bus_mute(AudioServer.get_bus_index("Effects")), "zero effects volume mutes all material and cleaning audio")
+	app.hud.effects_slider.value = 65
+	await frames()
+	await click_button("CLOSE")
 	for row: int in range(9):
 		var y: float = 0.02 + float(row) * 0.12
 		var first: Vector2 = surface_screen(Vector2(0.02, y))
@@ -201,6 +225,11 @@ func _run() -> void:
 		await frames(15)
 		app = current_scene as GameRoot
 		check(app != null and app.save_directory == old_directory and not app.session.completed and app.session.found and app.session.placements.is_empty(), "replay starts fresh while preserving permanent collectible")
+	var limiters: int = 0
+	for index: int in range(AudioServer.get_bus_effect_count(0)):
+		if AudioServer.get_bus_effect(0, index) is AudioEffectHardLimiter:
+			limiters += 1
+	check(limiters == 1, "audio limiter remains single after replay")
 	print("INPUT RESULT: %d checks, %d failures" % [checks, failures])
 	print("PC RENDER: " + RenderingServer.get_video_adapter_name() + " / " + RenderingServer.get_current_rendering_method())
 	print("PC DRAW CALLS: " + str(Performance.get_monitor(Performance.RENDER_TOTAL_DRAW_CALLS_IN_FRAME)))

@@ -1,6 +1,6 @@
 # Plan de pruebas y aceptación
 
-Fecha: 13 de octubre de 2026. Primer prototipo verificado. [Informe y evidencias](PROTOTYPE_REPORT.md): 52 comprobaciones de reglas, 34 de integración por renderizador y sobre paquete, 5 de datos exportados. Hardware móvil pendiente.
+Actualización: 14 de octubre de 2026. Prototipo 0.1.2 verificado. [Informe y evidencias](PROTOTYPE_REPORT.md): 58 comprobaciones de reglas, 30 de recursos, 64 de integración por renderizador y sobre paquete, 6 de datos exportados. Hardware móvil pendiente.
 
 ## Niveles de verificación
 
@@ -61,6 +61,8 @@ Recorrer inicio, cámara, manipulación, herramienta, objetivos, hallazgo y resu
 
 Revisar audio por buses, reducción de efectos y comparación antes/después con encuadre coincidente. Solicitar a jugadores que realicen tareas sin explicarles la solución; registrar confusión, errores de gesto y tiempo para entender la acción siguiente. Son observaciones locales, sin telemetría personal incorporada.
 
+0.1.2 verifica selección del perfil sonoro por objeto y apertura/cierre, roce al moverse, silencio al detener/cancelar, volumen de efectos a cero y limitador único después de repetir. La revisión de capturas comprueba las nuevas siluetas y que decoración/agrupado no oculten objetos jugables. La validación PCM de formato, amplitud, media y uniones no demuestra calidad percibida ni comodidad auditiva.
+
 ## Protocolo móvil y rendimiento
 
 Cuando haya hardware: registrar modelo, SoC/GPU, RAM, sistema, versión del juego, renderizador, resolución, escala 3D, modo de energía y condiciones de prueba. Ejecutar el mismo recorrido después de calentamiento y durante una sesión sostenida para observar degradación térmica.
@@ -73,8 +75,8 @@ No hay Android disponible. No se comprobó iOS. El simulador o el escritorio pue
 
 ## Automatización y trazabilidad
 
-Runner GDScript implementado: tests/domain_tests.gd para headless y tests/interaction_smoke.gd para ventana real. tests/export_data_tests.gd verifica datos del paquete. tools/verify.ps1 y tools/export-prototype.ps1 comprueban salida y errores de registros. No se usa un framework adicional. Automatizar validadores, reglas, progresión y persistencia; documentar el comando, código de salida y registros cuando se implemente. GitHub Actions puede importar/analizar y ejecutar esas pruebas con Godot 4.7.2 fijado. No existe aún workflow de CI.
+Runner GDScript implementado: tests/domain_tests.gd y tests/asset_tests.gd para headless, tests/interaction_smoke.gd para ventana real. tests/export_data_tests.gd verifica datos del paquete. tools/verify.ps1 y tools/export-prototype.ps1 comprueban salida y errores de registros. No se usa un framework adicional. GitHub Actions puede importar/analizar y ejecutar esas pruebas con Godot 4.7.2 fijado. No existe aún workflow de CI.
 
-0.1.1: 55 comprobaciones de dominio, 49 de integración por renderizador y sobre PCK, 5 de datos exportados. export-prototype.ps1 -Graphics recorre el paquete exportado. Los recorridos del juego usan guardados aislados; no reemplazan la partida del jugador. La comprobación de copia sin caché pertenece a 0.1.0.
+0.1.2: 58 comprobaciones de dominio, 30 de geometría/audio, 64 de integración por renderizador y sobre PCK, 6 de datos exportados. export-prototype.ps1 -Graphics recorre el paquete exportado. Los recorridos del juego usan guardados aislados; no reemplazan la partida del jugador.
 
 Registrar cada resultado con commit, prueba, plataforma, resultado, evidencia y defecto asociado. Solo marcar «verificado» lo efectivamente ejecutado. La lista de pendientes no bloquea el avance de tareas independientes, pero debe acompañar la entrega.

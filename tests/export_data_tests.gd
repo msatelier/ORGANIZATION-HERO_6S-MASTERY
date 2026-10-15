@@ -22,5 +22,8 @@ func _initialize() -> void:
 	if tr("CLOTH_TOOL") != "Use cloth":
 		failures += 1
 		push_error("Exported translation missing")
-	print("EXPORT DATA RESULT: 5 checks, %d failures" % failures)
+	if level.item("shirt_gold").shape != "shirt" or level.item("sock_blue").shape != "socks" or level.item("bottle").sound_profile != "plastic":
+		failures += 1
+		push_error("Export lost visual or material sound metadata")
+	print("EXPORT DATA RESULT: 6 checks, %d failures" % failures)
 	quit(1 if failures > 0 else 0)

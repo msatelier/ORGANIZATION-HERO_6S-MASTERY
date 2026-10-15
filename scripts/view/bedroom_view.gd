@@ -117,14 +117,14 @@ func _build_room() -> void:
 	settings.background_color = Color("#213f46")
 	settings.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
 	settings.ambient_light_color = Color("#f5dec4")
-	settings.ambient_light_energy = 0.55
+	settings.ambient_light_energy = 0.62
 	settings.tonemap_mode = Environment.TONE_MAPPER_FILMIC
 	environment.environment = settings
 	add_child(environment)
 	var sun: DirectionalLight3D = DirectionalLight3D.new()
 	sun.rotation_degrees = Vector3(-58, -28, 0)
 	sun.light_color = Color("#ffe2b9")
-	sun.light_energy = 1.25
+	sun.light_energy = 1.0
 	sun.shadow_enabled = true
 	sun.directional_shadow_max_distance = 30.0
 	add_child(sun)
@@ -154,7 +154,11 @@ func _build_room() -> void:
 	for x: float in [-0.95, 0.75]:
 		box(self, Vector3(x, 0.85, -2.8), Vector3(0.1, 1.7, 0.7), Color("#b68b63"))
 	cylinder(self, Vector3(0.15, 1.86, -2.8), 0.18, 0.3, Color("#cb8b64"))
-	cylinder(self, Vector3(0.15, 2.16, -2.8), 0.38, 0.5, Color("#6d9673"), 0.04)
+	cylinder(self, Vector3(0.15, 2.1, -2.8), 0.025, 0.44, Color("#588469"))
+	for index: int in range(6):
+		var side: float = -1.0 if index % 2 == 0 else 1.0
+		var leaf: MeshInstance3D = _leaf(Vector3(0.15 + side * 0.12, 2.02 + index * 0.043, -2.8), Vector3(0.3, 0.06, 0.14), Color("#6d9673"))
+		leaf.rotation.z = side * 0.48
 	# Desk and stool.
 	box(self, Vector3(2.05, 1.1, 0.6), Vector3(2.3, 0.16, 1.3), Color("#ae815c"))
 	for x: float in [1.1, 3.0]:
@@ -165,7 +169,43 @@ func _build_room() -> void:
 		box(self, Vector3(x, 0.26, 1.7), Vector3(0.09, 0.52, 0.09), Color("#a57c56"))
 	box(self, Vector3(3.6, 1.85, -3.35), Vector3(0.48, 0.72, 0.1), Color("#a07850"))
 	box(self, Vector3(3.6, 1.85, -3.26), Vector3(0.35, 0.59, 0.04), Color("#f0d5a3"))
+	_build_details()
 	hazard_marker = box(self, Vector3(0.2, 0.075, 0), Vector3(0.9, 0.02, 0.85), Color("#d9944b"))
+	MeshBatcher.combine_children(self, [hazard_marker])
+
+func _leaf(position: Vector3, size: Vector3, color: Color) -> MeshInstance3D:
+	var mesh: MeshInstance3D = MeshInstance3D.new()
+	var shape: SphereMesh = SphereMesh.new()
+	shape.radius = 0.5
+	shape.height = 1.0
+	shape.radial_segments = 10
+	shape.rings = 4
+	mesh.mesh = shape
+	mesh.scale = size
+	mesh.position = position
+	mesh.material_override = material(color)
+	add_child(mesh)
+	return mesh
+
+func _build_details() -> void:
+	# Decorations stay outside the item and cleaning interaction regions.
+	box(self, Vector3(-2.05, 2.86, -3.17), Vector3(2.22, 0.07, 0.08), Color("#aa815c"))
+	for x: float in [-3.03, -1.07]:
+		for fold: int in range(3):
+			cylinder(self, Vector3(x + (fold - 1) * 0.075, 2.06, -3.18), 0.055, 1.48, Color("#87a997") if fold % 2 == 0 else Color("#719988"))
+	# Blanket fold and a woven border on the rug.
+	box(self, Vector3(-2.35, 0.865, 1.35), Vector3(2.03, 0.04, 0.32), Color("#39776e"))
+	for x: float in [-1.04, 1.04]:
+		box(self, Vector3(x, 0.085, 0.9), Vector3(0.08, 0.008, 3.08), Color("#aab9a2"))
+	for z: float in [-0.6, 2.4]:
+		box(self, Vector3(0, 0.085, z), Vector3(2.16, 0.008, 0.08), Color("#aab9a2"))
+	# Small lamp on top of the wardrobe, away from the playable desk.
+	cylinder(self, Vector3(2.95, 2.49, -2.78), 0.18, 0.07, Color("#b18957"))
+	cylinder(self, Vector3(2.95, 2.67, -2.78), 0.025, 0.32, Color("#b18957"))
+	cylinder(self, Vector3(2.95, 2.91, -2.78), 0.28, 0.3, Color("#ead7ad"), 0.18)
+	# A tiny landscape inside the existing wall frame.
+	box(self, Vector3(3.6, 1.94, -3.23), Vector3(0.31, 0.23, 0.015), Color("#89b4ad"))
+	box(self, Vector3(3.6, 1.72, -3.23), Vector3(0.31, 0.17, 0.015), Color("#809475"))
 
 func _build_cabinet(data: ContainerData) -> void:
 	var body: StaticBody3D = _body("container", data.id, data.position, data.size, 4)
@@ -178,7 +218,9 @@ func _build_cabinet(data: ContainerData) -> void:
 	door.position = Vector3(-data.size.x / 2.0, -0.3, data.size.z / 2.0 + 0.05)
 	body.add_child(door)
 	box(door, Vector3(data.size.x / 2.0, 0, 0), Vector3(data.size.x, 1.1, 0.08), Color("#c8a178"))
-	cylinder(door, Vector3(data.size.x - 0.18, 0, 0.07), 0.055, 0.11, Color("#e6ca91"))
+	var handle: MeshInstance3D = cylinder(door, Vector3(data.size.x - 0.18, 0, 0.07), 0.055, 0.11, Color("#e6ca91"))
+	handle.rotation.x = PI / 2.0
+	MeshBatcher.combine_children(body)
 	door_nodes[data.id] = door
 	labels[data.id] = _label(body, data.name_key, Vector3(0, data.size.y / 2.0 + 0.28, 0))
 
@@ -199,6 +241,7 @@ func _build_target(rule: ItemPlacementRule) -> void:
 		box(guide, Vector3(0, 0.03, z), Vector3(1.36, 0.045, 0.045), Color("#f8d283"))
 	guide.visible = false
 	destination_guides[rule.id] = guide
+	MeshBatcher.combine_children(guide)
 	if rule.id in ["basket", "toy_box", "recycling"]:
 		box(body, Vector3(0, -0.18, 0), Vector3(1.2, 0.3, 0.78), rule.color.darkened(0.17))
 		for x: float in [-0.61, 0.61]:
@@ -207,33 +250,14 @@ func _build_target(rule: ItemPlacementRule) -> void:
 			box(body, Vector3(0, 0.01, z), Vector3(1.26, 0.38, 0.07), rule.color)
 	labels[rule.id] = _label(body, rule.name_key, Vector3(0, 0.57, 0))
 	target_nodes[rule.id] = body
+	MeshBatcher.combine_children(body, [pad])
 
 func _build_item(item: ItemData) -> void:
 	var body: StaticBody3D = _body("item", item.id, item.start_position, item.size + Vector3(0.12, 0.15, 0.12), 1)
 	var visual: Node3D = Node3D.new()
 	visual.name = "Visual"
 	body.add_child(visual)
-	match item.shape:
-		"cloth":
-			box(visual, Vector3.ZERO, item.size, item.color)
-			box(visual, Vector3(0, 0.015, -0.04), item.size * Vector3(0.65, 1.12, 0.75), item.color.lightened(0.08))
-		"book":
-			box(visual, Vector3.ZERO, item.size, item.color)
-			box(visual, Vector3(0, 0.002, 0.04), item.size * Vector3(0.84, 0.72, 0.86), Color("#f0e7cc"))
-			box(visual, Vector3(0, item.size.y / 2.0, 0), item.size * Vector3(1, 0.15, 1), item.color)
-		"bottle":
-			cylinder(visual, Vector3.ZERO, 0.14, 0.5, item.color)
-			cylinder(visual, Vector3(0, 0.28, 0), 0.08, 0.13, item.color.darkened(0.3))
-			cylinder(visual, Vector3(0, -0.02, 0), 0.145, 0.14, Color("#d7ddc6"))
-		"plush":
-			cylinder(visual, Vector3.ZERO, 0.25, 0.45, item.color, 0.18)
-			cylinder(visual, Vector3(0, 0.27, 0), 0.25, 0.27, item.color, 0.18)
-			for x: float in [-0.19, 0.19]:
-				cylinder(visual, Vector3(x, 0.42, 0), 0.09, 0.11, item.color)
-			for x: float in [-0.09, 0.09]:
-				box(visual, Vector3(x, 0.3, 0.23), Vector3(0.035, 0.04, 0.035), Color("#433d32"))
-		_:
-			box(visual, Vector3.ZERO, item.size, item.color)
+	ItemVisuals.build(self, visual, item)
 	var ring: MeshInstance3D = cylinder(body, Vector3(0, -item.size.y / 2.0 + 0.01, 0), maxf(item.size.x, item.size.z) * 0.7, 0.025, Color("#f4c977"))
 	ring.name = "Selection"
 	ring.visible = false
