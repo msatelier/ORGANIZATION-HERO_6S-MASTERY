@@ -5,7 +5,7 @@ static func calculate(viewport_size: Vector2, safe_area: Rect2) -> Dictionary[St
 	var area: Rect2 = safe_area.intersection(Rect2(Vector2.ZERO, viewport_size)).grow(-12)
 	var portrait: bool = viewport_size.x < viewport_size.y
 	var result: Dictionary[String, Rect2] = {}
-	result["top"] = Rect2(area.position, Vector2(area.size.x, 68))
+	result["top"] = Rect2(area.position, Vector2(area.size.x, 96))
 	if portrait:
 		result["toolbar"] = Rect2(Vector2(area.position.x, area.end.y - 188), Vector2(area.size.x, 188))
 		result["goals"] = Rect2(Vector2(area.position.x, result["toolbar"].position.y - 160), Vector2(area.size.x, 152))
@@ -25,4 +25,6 @@ static func calculate(viewport_size: Vector2, safe_area: Rect2) -> Dictionary[St
 	result["results"] = Rect2(area.get_center() - result_size * 0.5, result_size)
 	var settings_size: Vector2 = Vector2(minf(430, area.size.x), minf(540, area.size.y))
 	result["settings"] = Rect2(area.get_center() - settings_size * 0.5, settings_size)
+	var rooms_size: Vector2 = Vector2(minf(430, area.size.x), minf(380, area.size.y))
+	result["rooms"] = Rect2(area.get_center() - rooms_size * 0.5, rooms_size)
 	return result

@@ -26,3 +26,9 @@ Para reconstruirlo: ejecutar Godot con --headless --path . --script tools/bake-m
 - Ciclo completo: 65 comprobaciones por tamaño 432 × 960 / 960 × 432 en Mobile y Compatibility; repetido en el PCK exportado con Mobile.
 - PCM, duración de la composición y bucle comprobados en la fuente; formato y bucle comprobados también en el paquete.
 - Capturas de viewport real del PCK. Prueba física de Android, comodidad táctil, audio en teléfono y FPS móviles pendientes.
+
+## Ampliación 0.2.0 — 15 de octubre
+
+Se mantiene vertical 9:20 y la misma música. El nombre de la habitación funciona como botón del selector «La casa», con altura mínima de 48 unidades. El encabezado pasa a 96 unidades y la cámara recalcula el espacio restante. Los resultados permiten repetir o abrir la casa sin depender del encabezado.
+
+La cocina y el dormitorio se recorren en ambas orientaciones con Mobile/Compatibility y desde el PCK. La distribución incluye el selector y sus opciones, además de márgenes seguros. Cambiar de espacio conserva el reproductor de música; no reinicia la composición. Las pruebas de distribución suman 44 comprobaciones; los recorridos suman 65 del dormitorio y 38 de cocina/navegación por combinación.

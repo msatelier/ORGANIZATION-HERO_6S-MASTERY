@@ -10,3 +10,5 @@ extends Resource
 @export var angle_tolerance: float = PI
 @export var snap_pixels: float = 82.0
 @export var color: Color = Color(0.4, 0.8, 0.7)
+
+@export var is_bin: bool = false

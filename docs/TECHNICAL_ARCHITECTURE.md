@@ -1,6 +1,6 @@
 # Arquitectura técnica propuesta
 
-Actualización: 14 de octubre de 2026. Arquitectura objetivo con prototipo 0.1.3 implementado. GameRoot coordina; GameSession, PlacementRules, SaveStore, CameraController, InteractionController, BedroomView, GameHUD y FeedbackManager están integrados. [Evidencia](PROTOTYPE_REPORT.md).
+Actualización: 15 de octubre de 2026. Arquitectura objetivo con prototipo 0.2.0 implementado. GameRoot coordina; GameSession, PlacementRules, SaveStore, CameraController, InteractionController, RoomView, BedroomView, KitchenView, GameHUD y FeedbackManager están integrados. [Evidencia](PROTOTYPE_REPORT.md).
 
 ## Capas y autoridad del estado
 
@@ -97,7 +97,7 @@ El árbol muestra la organización futura. La base real usa scenes/app, scripts/
 
 ## Extensibilidad comprobable
 
-Antes de expandir, cargar una variante del dormitorio con otros IDs, cantidades y destinos. Después crear la cocina reutilizando selección, colocación, objetivos, guardado y limpieza. Si el núcleo requiere cambios para cada objeto nuevo, se revisan los contratos de datos antes de producir más habitaciones.
+Comprobado en 0.2.0: variante del dormitorio y cocina con IDs, categorías y destinos propios, reutilizando selección, colocación, objetivos, guardado y limpieza. Si el núcleo requiere cambios para cada objeto nuevo, se revisan los contratos de datos antes de producir más habitaciones.
 
 La optimización se guía por perfilado: materiales compartidos, colisiones simples, iluminación contenida y actividad por evento. Los límites de geometría, texturas, draw calls y memoria se fijarán tras medir una escena representativa.
 
@@ -114,3 +114,13 @@ La síntesis sigue siendo una producción de desarrollo. El [registro de recurso
 MobileLayout calcula paneles y zona jugable desde el viewport lógico y zona segura. GameHUD coloca las regiones, redistribuye objetivos/acciones y emite el rectángulo de juego; CameraController adapta tamaño y desplazamiento de la proyección a ese rectángulo. Cancelar al cambiar tamaño evita que un gesto confirme usando un encuadre anterior. La distribución usa base cuadrada con expand; Android queda en portrait según preferencia de Matías.
 
 MusicComposer produce la composición mediante bake-music.gd. El WAV y su importación PCM/bucle se versionan; SoundPalette lo carga junto con los efectos, sin componer durante el arranque. Se mantienen Music/Effects, pausa, fade y limitador. Los cambios de presentación no requieren migrar progreso.
+
+## Dos habitaciones en 0.2.0
+
+RoomCatalog reúne las dos definiciones y elige BedroomView o KitchenView. RoomView contiene colisiones, destinos, objetos, contenedores, limpieza, hallazgo, animaciones y comparación. Cada vista concreta solo construye su decoración. El marcador de paso deriva del objeto bloqueante; is_bin en ItemPlacementRule sustituye la lista de IDs especiales. La cámara recibe los puntos de encuadre de la vista; ambas habitaciones usan por ahora el mismo recinto.
+
+GameRoot mantiene una GameSession y un SaveStore por habitación, crea solo la vista activa y conserva cámara, HUD y FeedbackManager al cambiar. Desconecta las señales de la sesión anterior y reemplaza el controlador de entrada. El selector cancela el gesto, bloquea el mundo y muestra progreso/estrellas. La música sigue con el mismo reproductor.
+
+La ruta del dormitorio sigue siendo user://progress.json. La cocina usa user://rooms/home_kitchen_01/progress.json, con temporal/respaldo propios. settings.cfg conserva idioma/volumen y última habitación. Los esquemas siguen en 1, sin modificar partidas históricas. Las sesiones sin guardado sobreviven a cambios de habitación durante esa ejecución. Si una escritura normal falla se conserva la habitación activa; una versión futura queda protegida y permite visitar el otro espacio.
+
+LevelData incorpora claves de nombre, subtítulo y bienvenida, con valores predeterminados compatibles con el dormitorio. La sesión no conoce geometría, música ni navegación. Añadir una habitación requiere datos, decoración y entrada de catálogo; no una copia de reglas ni otro controlador. Ver [ROOMS_CONTENT.md](ROOMS_CONTENT.md) y pruebas de aislamiento antes de ampliar el catálogo.

@@ -1,6 +1,6 @@
 # Plan de pruebas y aceptación
 
-Actualización: 14 de octubre de 2026. Prototipo 0.1.3 verificado. [Informe y evidencias](PROTOTYPE_REPORT.md): 58 comprobaciones de reglas, 31 de recursos, 36 de distribución, 65 de integración por orientación/renderizador y sobre paquete, 7 de datos exportados. Hardware móvil pendiente.
+Actualización: 15 de octubre de 2026. Prototipo 0.2.0 verificado. [Informe y evidencias](PROTOTYPE_REPORT.md): 58 comprobaciones de reglas, 31 de recursos, 26 de habitaciones/guardado, 44 de distribución, 65 de integración del dormitorio y 38 de cocina/navegación por orientación/renderizador y sobre paquete, 9 de datos exportados. Hardware móvil pendiente.
 
 ## Niveles de verificación
 
@@ -80,3 +80,11 @@ Runner GDScript implementado: tests/domain_tests.gd y tests/asset_tests.gd para 
 0.1.3: tests/layout_tests.gd verifica límites, superposiciones, tamaños táctiles, encuadre y márgenes simulados en cuatro tamaños y dos idiomas. verify.ps1 -Graphics recorre vertical/horizontal con Mobile y Compatibility. export-prototype.ps1 -Graphics recorre ambas orientaciones del PCK. Los recorridos usan guardados aislados; no reemplazan la partida del jugador. La música se comprueba también después de importar/exportar el WAV.
 
 Registrar cada resultado con commit, prueba, plataforma, resultado, evidencia y defecto asociado. Solo marcar «verificado» lo efectivamente ejecutado. La lista de pendientes no bloquea el avance de tareas independientes, pero debe acompañar la entrega.
+
+## Ampliación doméstica 0.2.0
+
+rooms_tests.gd comprueba la definición completa de cocina, solución con reglas compartidas, guardados independientes, compatibilidad del archivo histórico del dormitorio, respaldo propio, aislamiento de versiones futuras y textos de contenido en ambos idiomas.
+
+interaction_smoke.gd --test-room=kitchen comienza con progreso parcial en dormitorio, abre el selector mediante entrada, visita cocina, coloca ocho objetos mediante toques, limpia la isla, descubre su recuerdo y completa con tres estrellas. Comprueba antes/después, cambio entre ambas sesiones, bytes del guardado anterior, cierre/reapertura con última habitación y repetición exclusiva de cocina. También comprueba continuidad del reproductor de música y limitador único. verify.ps1 -Graphics ejecuta ambos recorridos en Mobile/Compatibility y dos tamaños; export-prototype.ps1 -Graphics los repite sobre PCK con Mobile.
+
+layout_tests.gd incluye el selector, su botón de acceso y opciones táctiles. Una prueba detectó un tamaño mínimo incorrecto del panel oculto debido al texto ajustable; el texto de introducción usa dos líneas definidas y el panel se verifica incluso con márgenes simulados.

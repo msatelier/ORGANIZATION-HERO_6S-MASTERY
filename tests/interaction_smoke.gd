@@ -5,6 +5,7 @@ var app: GameRoot
 var checks: int = 0
 var failures: int = 0
 var graphical: bool = false
+var kitchen_test: bool = false
 var output_dir: String = "res://build/previews"
 
 func _initialize() -> void:
@@ -30,7 +31,9 @@ func _run() -> void:
 		quit(2)
 		return
 	for argument: String in OS.get_cmdline_user_args():
-		if argument.begins_with("--preview-dir="):
+		if argument == "--test-room=kitchen":
+			kitchen_test = true
+		elif argument.begins_with("--preview-dir="):
 			output_dir = argument.trim_prefix("--preview-dir=")
 		elif argument.begins_with("--test-size="):
 			var dimensions: PackedStringArray = argument.trim_prefix("--test-size=").split("x")
@@ -43,6 +46,10 @@ func _run() -> void:
 	current_scene = app
 	await frames(30)
 	await create_timer(0.6).timeout
+	if kitchen_test:
+		await _run_kitchen()
+		await _finish()
+		return
 	check(app.hud.title.text == "ORGANIZATION HERO", "main scene and HUD start")
 	check(not app.session.completed and app.session.placements.is_empty(), "fresh isolated session starts")
 	var fitted: bool = true
@@ -118,7 +125,7 @@ func _run() -> void:
 	await click_button("CLOSE")
 	check(not app.hud.settings_overlay.visible, "settings closes and restores world interaction")
 
-	var cabinet_position: Vector2 = app.rig.camera.unproject_position(app.LEVEL.containers[0].position)
+	var cabinet_position: Vector2 = app.rig.camera.unproject_position(app.level.containers[0].position)
 	await touch_tap(cabinet_position)
 	check(app.session.opened["cabinet"], "touch tap opens container")
 	check(app.feedback.last_clip_key == "container_open", "opening container routes to opening sound")
@@ -156,11 +163,11 @@ func _run() -> void:
 	app.rig.overview()
 	await frames(35)
 
-	for item: ItemData in app.LEVEL.items:
+	for item: ItemData in app.level.items:
 		if app.session.placements.has(item.id):
 			continue
 		var target: String = ""
-		for rule: ItemPlacementRule in app.LEVEL.placements:
+		for rule: ItemPlacementRule in app.level.placements:
 			if item.category in rule.categories:
 				target = rule.id
 				break
@@ -206,9 +213,9 @@ func _run() -> void:
 		await frames(2)
 		if row == 2:
 			await capture("bedroom-cleaning")
-	check(app.session.clean_ratio() >= app.LEVEL.cleaning.completion_ratio, "mouse strokes really clean required surface")
+	check(app.session.clean_ratio() >= app.level.cleaning.completion_ratio, "mouse strokes really clean required surface")
 	check(app.session.can_finish(), "all mandatory objectives complete through input")
-	var loaded: GameSession = SaveStore.new(app.save_directory).load_session(app.LEVEL)
+	var loaded: GameSession = SaveStore.new(app.save_directory).load_session(app.level)
 	check(loaded.placements == app.session.placements and loaded.cleaned == app.session.cleaned and loaded.found, "input actions resume from actual saved JSON")
 	await click_button("CLOTH_TOOL")
 	await frames(45)
@@ -242,6 +249,9 @@ func _run() -> void:
 		if AudioServer.get_bus_effect(0, index) is AudioEffectHardLimiter:
 			limiters += 1
 	check(limiters == 1, "audio limiter remains single after replay")
+	await _finish()
+
+func _finish() -> void:
 	print("INPUT RESULT: %d checks, %d failures" % [checks, failures])
 	print("PC RENDER: " + RenderingServer.get_video_adapter_name() + " / " + RenderingServer.get_current_rendering_method())
 	print("PC DRAW CALLS: " + str(Performance.get_monitor(Performance.RENDER_TOTAL_DRAW_CALLS_IN_FRAME)))
@@ -249,8 +259,115 @@ func _run() -> void:
 	await frames(3)
 	quit(1 if failures > 0 else 0)
 
+func _run_kitchen() -> void:
+	await touch_tap(item_screen("book_mint"))
+	await touch_tap(target_screen("shelf"))
+	await frames(18)
+	check(app.session.placements.get("book_mint") == "shelf", "bedroom progress exists before navigation")
+	var original: Dictionary = app.session.snapshot()
+	var old_bytes: PackedByteArray = FileAccess.get_file_as_bytes(app.save_directory.path_join("progress.json"))
+	var music_id: int = app.feedback.music.get_instance_id()
+	await touch_tap(item_screen("shirt_gold"))
+	await click_button("ROOMS")
+	check(app.hud.rooms_overlay.visible and app.interaction.selected_item.is_empty(), "room picker cancels active selection")
+	check(app.hud.blocks(app.hud.play_area.get_center()), "room picker blocks world gestures")
+	await capture("home-rooms")
+	await touch_tap(app.hud.room_buttons[RoomCatalog.KITCHEN.id].get_global_rect().get_center())
+	await frames(60)
+	check(app.level == RoomCatalog.KITCHEN and not app.hud.rooms_overlay.visible and app.room is KitchenView, "touch room choice opens kitchen")
+	check(app.feedback.music.get_instance_id() == music_id and app.feedback.music.playing, "room change keeps the same music player running")
+	var fitted: bool = true
+	for point: Vector3 in app.rig.frame_points:
+		fitted = fitted and app.hud.play_area.grow(3).has_point(app.rig.camera.unproject_position(point))
+	check(fitted, "kitchen fits the phone play area")
+	await capture("kitchen-before")
+	await click_button("HINT")
+	check(app.interaction.selected_item == "mug_sage" and app.hud.toast.text == app.tr("HINT_OPEN"), "kitchen hint identifies closed storage")
+	await touch_tap(target_screen("dish_rack"))
+	check(app.session.placements.is_empty() and app.hud.toast.text == app.tr("WRONG_CATEGORY"), "kitchen rejects incorrect destination through touch")
+	await touch_tap(app.rig.camera.unproject_position(Vector3(2.6, 1.25, -2.2)))
+	await frames(25)
+	check(app.session.opened["cabinet"], "kitchen cupboard opens through touch")
+	await touch_tap(item_screen("mug_sage"))
+	await capture("kitchen-selection")
+	await touch_tap(target_screen("cupboard"))
+	await frames(18)
+	check(app.session.placements.get("mug_sage") == "cupboard", "two taps store a kitchen mug")
+	await click_button("UNDO")
+	await frames(18)
+	check(not app.session.placements.has("mug_sage"), "kitchen undo restores the mug")
+	for item: ItemData in app.level.items:
+		var target: String = ""
+		for rule: ItemPlacementRule in app.level.placements:
+			if app.session.placement_reason(item.id, rule.id).is_empty():
+				target = rule.id
+				break
+		await touch_tap(item_screen(item.id))
+		await touch_tap(target_screen(target))
+		await frames(18)
+		check(app.session.placements.get(item.id) == target, "kitchen touch placement: " + item.id)
+	await touch_tap(app.rig.camera.unproject_position(app.room.collectible_node.global_position))
+	check(app.session.found and app.session.hazard_safe(), "kitchen path clears and own keepsake is collected")
+	await click_button("CLOTH_TOOL")
+	await frames(60)
+	for row: int in range(9):
+		var y: float = 0.02 + float(row) * 0.12
+		touch_event(0, surface_screen(Vector2(0.02, y)), true)
+		await frames(2)
+		for step: int in range(13):
+			touch_motion(0, surface_screen(Vector2(0.02 + 0.96 * step / 12.0, y)))
+			await frames(1)
+		touch_event(0, surface_screen(Vector2(0.98, y)), false)
+		await frames(2)
+		if row == 2:
+			await capture("kitchen-cleaning")
+	check(app.session.can_finish(), "touch strokes clean the kitchen island and complete mandatory tasks")
+	await click_button("CLOTH_TOOL")
+	await frames(45)
+	await click_button("INSPECT")
+	await frames(30)
+	check(app.session.completed and app.session.stars() == 3 and app.hud.results_panel.visible, "kitchen inspection awards three stars")
+	await capture("kitchen-results")
+	await click_button("COMPARE")
+	await click_button("BEFORE")
+	check(app.room.before_mode and app.session.completed, "kitchen comparison does not alter progress")
+	await click_button("AFTER")
+	await frames(30)
+	await capture("kitchen-after")
+	await click_button("BACK_RESULTS")
+	var completed: Dictionary = app.session.snapshot()
+	check(FileAccess.get_file_as_bytes(app.save_directory.path_join("progress.json")) == old_bytes, "full kitchen cycle leaves original bedroom save byte-identical")
+	await click_button("ROOMS_RESULTS")
+	check(app.hud.room_buttons[RoomCatalog.KITCHEN.id].text.contains("★★★"), "picker displays completed kitchen stars")
+	await touch_tap(app.hud.room_buttons[RoomCatalog.BEDROOM.id].get_global_rect().get_center())
+	await frames(35)
+	check(app.session.snapshot() == original and app.room is BedroomView, "returning restores independent bedroom state")
+	await click_button("ROOMS")
+	await touch_tap(app.hud.room_buttons[RoomCatalog.KITCHEN.id].get_global_rect().get_center())
+	await frames(35)
+	check(app.session.snapshot() == completed and app.hud.results_panel.visible, "returning restores completed kitchen")
+	var directory: String = app.save_directory
+	app.free()
+	await frames(3)
+	app = MAIN.instantiate()
+	app.save_directory = directory
+	root.add_child(app)
+	current_scene = app
+	await frames(45)
+	check(app.level == RoomCatalog.KITCHEN and app.session.snapshot() == completed, "application restart resumes last chosen room from disk")
+	check(app.sessions[RoomCatalog.BEDROOM.id].snapshot() == original, "application restart also restores bedroom progress")
+	await click_button("PLAY_AGAIN")
+	await frames(30)
+	check(app.level == RoomCatalog.KITCHEN and not app.session.completed and app.session.found and app.session.placements.is_empty(), "replay resets only kitchen and keeps its collectible")
+	check(app.sessions[RoomCatalog.BEDROOM.id].snapshot() == original, "kitchen replay preserves bedroom progress")
+	var limiters: int = 0
+	for index: int in range(AudioServer.get_bus_effect_count(0)):
+		if AudioServer.get_bus_effect(0, index) is AudioEffectHardLimiter:
+			limiters += 1
+	check(limiters == 1, "navigation and application restart do not duplicate audio limiter")
+
 func surface_screen(uv: Vector2) -> Vector2:
-	var task: CleaningTaskData = app.LEVEL.cleaning
+	var task: CleaningTaskData = app.level.cleaning
 	var world: Vector3 = task.position + Vector3((uv.x - 0.5) * task.size.x, 0, (uv.y - 0.5) * task.size.y)
 	return app.rig.camera.unproject_position(world)
 

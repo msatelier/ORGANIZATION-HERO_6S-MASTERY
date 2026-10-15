@@ -2,6 +2,9 @@ class_name LevelData
 extends Resource
 
 @export var id: String = ""
+@export var name_key: String = "BEDROOM"
+@export var chapter_key: String = "CHAPTER_MOBILE"
+@export var welcome_key: String = "WELCOME"
 @export var content_version: int = 1
 @export var items: Array[ItemData] = []
 @export var placements: Array[ItemPlacementRule] = []

@@ -1,6 +1,6 @@
 # Hoja de ruta y backlog inicial
 
-Fecha: 14 de octubre de 2026. Actualizada tras el refinamiento 0.1.3. Hitos por resultado; sin calendario comercial comprometido.
+Fecha: 15 de octubre de 2026. Actualizada tras la ampliación 0.2.0. Hitos por resultado; sin calendario comercial comprometido.
 
 | Hito | Fase del prompt | Resultado | Estado |
 | --- | --- | --- | --- |
@@ -9,7 +9,7 @@ Fecha: 14 de octubre de 2026. Actualizada tras el refinamiento 0.1.3. Hitos por 
 | M2: tareas del dormitorio | 1 | Clasificación, contenedor, limpieza, seguridad y coleccionable | Implementado y comprobado en PC |
 | M3: ciclo completo | 1 | Objetivos, final, resumen, antes/después y reanudación | Prototipo completo comprobado desde fuente y paquete |
 | M4: calidad y validación | 2 y cierre de 1 | Controles refinados, presentación y evidencia móvil | En progreso: controles y primera mejora de arte/audio comprobados en PC; jugadores, mezcla final y móvil pendientes |
-| M5: casa ampliada | 3 | Cocina reutilizable, luego otros tres escenarios | Pendiente |
+| M5: casa ampliada | 3 | Cocina reutilizable, luego otros tres escenarios | En progreso: cocina y selector implementados; baño, sala y garaje pendientes |
 | M6: fábrica y retos | 4 | Escenarios industriales y desafío opcional | Pendiente |
 | M7: comercialización | 5 | Servicios comerciales y entregas para tiendas | Pendiente |
 
@@ -81,7 +81,7 @@ Una versión de escritorio jugable puede entregarse antes de contar con Android.
 
 ## M5 — Expansión doméstica
 
-Crear primero una variante de datos y luego cocina para comprobar reutilización. Incorporar baño, sala y garaje después de validar el coste por nivel. Separar las tareas comunes de aquellas que requieran una herramienta o regla realmente nueva.
+Realizado en 0.2.0: variante de datos comprobada, cocina de ocho objetos, selector con estado/estrellas y progreso independiente compatible con el dormitorio anterior. RoomView comparte representación/interacción; BedroomView y KitchenView construyen su decoración. El ciclo de cocina reutiliza reglas, limpieza, objetivos, audio y resultados. [Contenido y procedimiento](ROOMS_CONTENT.md). Siguiente paso: probar comprensión de destinos y navegación con Matías; incorporar baño, sala y garaje después de validar el coste por nivel. Separar las tareas comunes de aquellas que requieran una herramienta o regla realmente nueva.
 
 Cierre por escenario: ciclo completo, recursos integrados, objetivos declarados, guardado compatible y pruebas de regresión relevantes. No producir cuatro niveles sobre contratos todavía inestables.
 

@@ -12,6 +12,7 @@ var play_area: Rect2
 var zoom_factor: float = 1.0
 var fit_size: float = 13.0
 var frame_points: Array[Vector3] = []
+var room_points: Array[Vector3] = []
 var desired_h_offset: float = 0.0
 var desired_v_offset: float = 0.0
 
@@ -75,8 +76,12 @@ func set_play_area(area: Rect2) -> void:
 	play_area = area
 	_fit_frame()
 
+func set_room_frame(points: Array[Vector3]) -> void:
+	room_points = points.duplicate()
+	overview()
+
 func _overview_points() -> Array[Vector3]:
-	return [Vector3(-4.35, 0, -3.7), Vector3(4.35, 0, -3.7), Vector3(-4.35, 0, 3.7), Vector3(4.35, 0, 3.7), Vector3(-4.35, 3.5, -3.7), Vector3(4.35, 3.5, -3.7), Vector3(-4.35, 3.5, 3.7)]
+	return room_points.duplicate()
 
 func _fit_frame() -> void:
 	if camera == null or frame_points.is_empty():

@@ -116,3 +116,11 @@ Los nuevos campos visuales/sonoros no se guardan en el progreso. Esquema y versi
 Matías eligió vertical el 14 de octubre de 2026. Esta indicación actualiza el landscape inicial del prompt. Se usa base lógica cuadrada 480 × 480 con expand, ventana 432 × 960 y Android portrait. MobileLayout calcula paneles/zona jugable a partir del área segura; CameraController encuadra habitación o mesa en esa zona y usa zoom relativo. La distribución horizontal sigue disponible al redimensionar en PC. Se verifican límites y entrada en ambas orientaciones, sin atribuir a la PC una prueba física de teléfono.
 
 El acorde sostenido se reemplaza por una composición original de 16 compases a 96 BPM. MusicComposer y bake-music.gd generan el WAV previamente; la ejecución no compone la música. Se conserva PCM, sin normalización/compresión del importador, y se verifica el bucle completo desde el paquete. La mezcla mantiene los buses y ajustes existentes. No cambia el esquema de progreso.
+
+## D-014: catálogo doméstico y guardado por habitación
+
+0.2.0 incorpora cocina reutilizando la sesión, reglas, controles, audio y HUD. La decoración se separa en BedroomView/KitchenView sobre RoomView; la señalización de destinos usa datos, no IDs especiales. RoomCatalog limita la selección a definiciones conocidas y define la ruta de cada partida.
+
+El dormitorio mantiene su archivo histórico sin migración. Cocina escribe en un subdirectorio propio, con respaldo y protección de versiones independientes. GameRoot conserva las dos sesiones mientras cambia solo la vista y la entrada; música/cámara/HUD permanecen. Repetir afecta únicamente la habitación activa. La última selección se registra en settings.cfg.
+
+Se eligió un selector pequeño con ambas habitaciones abiertas en Relax, sin añadir bloqueo por estrellas ni un modelo de campaña todavía. La prueba de cocina recorre navegación, guardado, reapertura y repetición, además de completar las mismas mecánicas. Las partidas del dormitorio se comparan byte a byte antes/después del ciclo de cocina.

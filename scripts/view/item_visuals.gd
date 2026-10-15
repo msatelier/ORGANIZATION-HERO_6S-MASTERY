@@ -5,6 +5,25 @@ static func build(room: Node3D, parent: Node3D, item: ItemData) -> void:
 	var color: Color = item.color
 	var size: Vector3 = item.size
 	match item.shape:
+		"mug":
+			room.cylinder(parent, Vector3(0, -0.02, 0), 0.17, 0.37, color)
+			room.cylinder(parent, Vector3(0, 0.17, 0), 0.17, 0.035, color.lightened(0.3))
+			room.cylinder(parent, Vector3(0, 0.192, 0), 0.125, 0.01, color.darkened(0.5))
+			room.box(parent, Vector3(0.23, 0, 0), Vector3(0.06, 0.26, 0.09), color)
+			for y: float in [-0.11, 0.11]:
+				room.box(parent, Vector3(0.18, y, 0), Vector3(0.13, 0.05, 0.09), color)
+		"plate":
+			room.cylinder(parent, Vector3(0, -0.025, 0), size.x * 0.5, 0.07, color)
+			room.cylinder(parent, Vector3(0, 0.016, 0), size.x * 0.38, 0.018, color.lightened(0.3))
+		"jar":
+			room.cylinder(parent, Vector3(0, -0.025, 0), 0.18, 0.44, color)
+			room.cylinder(parent, Vector3(0, 0.22, 0), 0.19, 0.07, Color("#789381"))
+			room.box(parent, Vector3(0, 0, 0.18), Vector3(0.2, 0.18, 0.012), Color("#f1e4c3"))
+		"towel":
+			room.box(parent, Vector3.ZERO, size * Vector3(1, 0.5, 1), color)
+			room.box(parent, Vector3(0, size.y * 0.3, size.z * 0.18), size * Vector3(1, 0.12, 0.55), color.lightened(0.12))
+			for x: float in [-0.32, 0.32]:
+				room.box(parent, Vector3(size.x * x, size.y * 0.4, 0), Vector3(0.035, 0.01, size.z), Color("#eadfbd"))
 		"shirt":
 			var outline: PackedVector2Array = PackedVector2Array([
 				Vector2(-0.5, -0.22), Vector2(-0.32, -0.5), Vector2(-0.16, -0.44),

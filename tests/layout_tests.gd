@@ -39,8 +39,10 @@ func _run() -> void:
 			await settle()
 			var viewport: Rect2 = root.get_visible_rect()
 			var panels: bool = true
-			for panel: Control in [app.hud.top_panel, app.hud.goals_panel, app.hud.toolbar, app.hud.results_panel, app.hud.settings_panel, app.hud.comparison_panel]:
+			for panel: Control in [app.hud.top_panel, app.hud.goals_panel, app.hud.toolbar, app.hud.results_panel, app.hud.settings_panel, app.hud.rooms_panel, app.hud.comparison_panel]:
 				panels = panels and viewport.encloses(panel.get_global_rect())
+				if not viewport.encloses(panel.get_global_rect()):
+					print("OUTSIDE PANEL: %s / %s / minimum %s" % [panel.name, panel.get_global_rect(), panel.get_combined_minimum_size()])
 			check(panels, "panels remain within %s / %s" % [size, language])
 			var controls: bool = true
 			for key: String in ["CLOTH_TOOL", "UNDO", "OVERVIEW", "INSPECT"]:
@@ -52,6 +54,12 @@ func _run() -> void:
 			for point: Vector3 in app.rig.frame_points:
 				framing = framing and app.hud.play_area.grow(2).has_point(app.rig.camera.unproject_position(point))
 			check(framing, "room fits around the interface: %s / %s" % [size, language])
+			var room_controls: bool = app.hud.top_panel.get_global_rect().encloses(app.hud.subtitle.get_global_rect()) and app.hud.subtitle.size.y >= 48
+			for button: Button in app.hud.room_buttons.values():
+				room_controls = room_controls and app.hud.rooms_panel.get_global_rect().encloses(button.get_global_rect()) and button.size.y >= 48
+			for key: String in ["COMPARE", "PLAY_AGAIN", "ROOMS_RESULTS"]:
+				room_controls = room_controls and app.hud.results_panel.get_global_rect().encloses(app.hud.buttons[key].get_global_rect())
+			check(room_controls, "room navigation controls fit: %s / %s" % [size, language])
 		# Simulate a cutout and the bottom gesture region in logical coordinates.
 		var logical: Vector2 = root.get_visible_rect().size
 		var safe: Rect2 = Rect2(Vector2(24, 24), logical - Vector2(48, 48))
@@ -59,7 +67,7 @@ func _run() -> void:
 		app.hud._safe_area()
 		await settle()
 		var safe_panels: bool = true
-		for panel: Control in [app.hud.top_panel, app.hud.goals_panel, app.hud.toolbar, app.hud.results_panel, app.hud.settings_panel, app.hud.comparison_panel]:
+		for panel: Control in [app.hud.top_panel, app.hud.goals_panel, app.hud.toolbar, app.hud.results_panel, app.hud.settings_panel, app.hud.rooms_panel, app.hud.comparison_panel]:
 			safe_panels = safe_panels and safe.encloses(panel.get_global_rect())
 		check(safe_panels, "safe insets respected on all edges: " + str(size))
 		app.hud.safe_area_override = Rect2()

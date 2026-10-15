@@ -29,5 +29,12 @@ func _initialize() -> void:
 	if music == null or music.format != AudioStreamWAV.FORMAT_16_BITS or not is_equal_approx(music.get_length(), 40.0) or music.loop_mode != AudioStreamWAV.LOOP_FORWARD:
 		failures += 1
 		push_error("Exported music format or complete loop is missing")
-	print("EXPORT DATA RESULT: 7 checks, %d failures" % failures)
+	var kitchen: LevelData = load("res://resources/levels/kitchen.tres")
+	if not kitchen.validate().is_empty() or kitchen.items.size() != 8 or kitchen.placement("cupboard").slots.size() != 2:
+		failures += 1
+		push_error("Exported kitchen or destination data missing")
+	if kitchen.item("dish_towel").shape != "towel" or tr(kitchen.name_key) != "Kitchen" or not level.placement("basket").is_bin:
+		failures += 1
+		push_error("Export lost new presentation metadata or localization")
+	print("EXPORT DATA RESULT: 9 checks, %d failures" % failures)
 	quit(1 if failures > 0 else 0)

@@ -12,6 +12,8 @@ signal request_comparison(before: bool)
 signal settings_changed(values: Dictionary)
 signal settings_opened
 signal layout_changed(play_area: Rect2)
+signal request_level(id: String)
+signal rooms_opened
 
 var session: GameSession
 var root_control: Control
@@ -22,7 +24,13 @@ var results_panel: PanelContainer
 var comparison_panel: PanelContainer
 var settings_overlay: ColorRect
 var title: Label
-var subtitle: Label
+var subtitle: Button
+var rooms_overlay: ColorRect
+var rooms_panel: PanelContainer
+var rooms_title: Label
+var rooms_description: Label
+var room_buttons: Dictionary[String, Button] = {}
+var room_progress: Dictionary = {}
 var instruction: Label
 var toast: Label
 var progress: ProgressBar
@@ -63,6 +71,7 @@ func _ready() -> void:
 	_build_toolbar()
 	_build_results()
 	_build_settings()
+	_build_rooms()
 	get_viewport().size_changed.connect(_safe_area)
 	_safe_area()
 	refresh_text()
@@ -142,7 +151,9 @@ func _build_top() -> void:
 	names.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	row.add_child(names)
 	title = _label(names, 20)
-	subtitle = _label(names, 14)
+	subtitle = _button(names, "ROOMS", _open_rooms)
+	subtitle.add_theme_font_size_override("font_size", 14)
+	subtitle.alignment = HORIZONTAL_ALIGNMENT_LEFT
 	_button(row, "HINT", func() -> void: request_hint.emit())
 	_button(row, "SETTINGS", func() -> void:
 		settings_overlay.visible = true
@@ -246,7 +257,11 @@ func _build_results() -> void:
 	result_collection.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	result_collection.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_button(column, "COMPARE", _open_comparison)
-	_button(column, "PLAY_AGAIN", func() -> void: request_restart.emit())
+	var actions: HBoxContainer = HBoxContainer.new()
+	actions.add_theme_constant_override("separation", 10)
+	column.add_child(actions)
+	_button(actions, "PLAY_AGAIN", func() -> void: request_restart.emit()).size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_button(actions, "ROOMS_RESULTS", _open_rooms).size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	results_panel.visible = false
 	comparison_panel = _panel()
 	comparison_panel.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_WIDE)
@@ -331,6 +346,52 @@ func _setting_value(_value: Variant) -> void:
 		"locale": "es" if locale_choice.selected == 0 else "en"
 	})
 
+func _build_rooms() -> void:
+	rooms_overlay = ColorRect.new()
+	rooms_overlay.color = Color(0.05, 0.12, 0.13, 0.85)
+	rooms_overlay.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	root_control.add_child(rooms_overlay)
+	rooms_panel = PanelContainer.new()
+	rooms_overlay.add_child(rooms_panel)
+	var column: VBoxContainer = VBoxContainer.new()
+	column.add_theme_constant_override("separation", 14)
+	rooms_panel.add_child(column)
+	rooms_title = _label(column, 26)
+	rooms_description = _label(column, 16)
+	for level: LevelData in RoomCatalog.levels():
+		var button: Button = Button.new()
+		button.custom_minimum_size.y = 88
+		button.add_theme_font_size_override("font_size", 18)
+		button.pressed.connect(func() -> void: request_level.emit(level.id))
+		column.add_child(button)
+		room_buttons[level.id] = button
+	_button(column, "ROOMS_CLOSE", func() -> void: rooms_overlay.visible = false)
+	rooms_overlay.visible = false
+
+func _open_rooms() -> void:
+	rooms_overlay.visible = true
+	rooms_opened.emit()
+	_safe_area()
+
+func set_room_progress(values: Dictionary) -> void:
+	room_progress = values
+	_refresh_rooms()
+
+func _refresh_rooms() -> void:
+	if rooms_title == null:
+		return
+	rooms_title.text = tr("ROOMS")
+	rooms_description.text = tr("ROOMS_DESCRIPTION")
+	for level: LevelData in RoomCatalog.levels():
+		var detail: String = tr("ROOM_NEW")
+		var state: Dictionary = room_progress.get(level.id, {})
+		if state.get("completed", false):
+			detail = "★".repeat(int(state.get("stars", 2))) + " · " + tr("ROOM_DONE")
+		elif state.get("started", false):
+			detail = tr("ROOM_IN_PROGRESS")
+		var current: bool = session != null and session.level.id == level.id
+		room_buttons[level.id].text = tr(level.name_key) + (" · " + tr("ROOM_CURRENT") if current else "") + "\n" + detail
+
 func apply_settings(values: Dictionary) -> void:
 	applying_settings = true
 	music_slider.value = float(values.get("music", 0.35)) * 100.0
@@ -342,9 +403,20 @@ func apply_settings(values: Dictionary) -> void:
 	refresh_text()
 
 func bind(state: GameSession) -> void:
+	if session != null and session.changed.is_connected(refresh):
+		session.changed.disconnect(refresh)
+	for label: Label in goal_labels.values():
+		label.free()
+	goal_labels.clear()
 	session = state
-	if goal_labels.is_empty():
-		_create_goal_labels()
+	_create_goal_labels()
+	selected_id = ""
+	destination_id = ""
+	destination_reason = ""
+	using_cloth = false
+	comparison_active = false
+	settings_overlay.visible = false
+	rooms_overlay.visible = false
 	session.changed.connect(refresh)
 	refresh_text()
 	_safe_area()
@@ -353,9 +425,11 @@ func refresh_text() -> void:
 	if title == null:
 		return
 	title.text = "ORGANIZATION HERO"
-	subtitle.text = tr("CHAPTER_MOBILE")
 	for key: String in buttons:
 		buttons[key].text = tr(key)
+	subtitle.text = tr(session.level.chapter_key if session != null else "CHAPTER_MOBILE") + " ▾"
+	_refresh_rooms()
+	_safe_area.call_deferred()
 	settings_title.text = tr("SETTINGS")
 	music_label.text = tr("MUSIC")
 	effects_label.text = tr("SOUND")
@@ -437,7 +511,7 @@ func close_settings() -> void:
 	settings_overlay.visible = false
 
 func blocks(point: Vector2) -> bool:
-	if settings_overlay.visible:
+	if settings_overlay.visible or rooms_overlay.visible:
 		return true
 	for panel: PanelContainer in [top_panel, goals_panel, toolbar, results_panel, comparison_panel]:
 		if panel.visible and panel.get_global_rect().has_point(point):
@@ -462,7 +536,7 @@ func _safe_area() -> void:
 	for label: Label in goal_labels.values():
 		label.add_theme_font_size_override("font_size", 14 if viewport_size.x < viewport_size.y else 13)
 		label.custom_minimum_size.x = (layout["goals"].size.x - 28 - 8 * (goal_grid.columns - 1)) / goal_grid.columns
-	for pair: Array in [[top_panel, "top"], [goals_panel, "goals"], [toolbar, "toolbar"], [toast, "toast"], [results_panel, "results"], [comparison_panel, "comparison"], [settings_panel, "settings"]]:
+	for pair: Array in [[top_panel, "top"], [goals_panel, "goals"], [toolbar, "toolbar"], [toast, "toast"], [results_panel, "results"], [comparison_panel, "comparison"], [settings_panel, "settings"], [rooms_panel, "rooms"]]:
 		_place(pair[0], layout[pair[1]])
 	play_area = layout["play"]
 	refresh()

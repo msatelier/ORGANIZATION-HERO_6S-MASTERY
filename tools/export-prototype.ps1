@@ -32,6 +32,9 @@ if ($Graphics) {
         $taskSaveDirectory = 'user://packed-input-' + [Guid]::NewGuid().ToString('N')
         $taskPreviewDirectory = (Join-Path $taskBuild "previews-packed-$taskSize").Replace('\', '/')
         Invoke-ExportCheck -Name "input-packed-$taskSize" -Arguments @('--main-pack', $taskPack, '--script', (Join-Path $taskProject 'tests\interaction_smoke.gd'), '--', "--save-dir=$taskSaveDirectory", "--preview-dir=$taskPreviewDirectory", "--test-size=$taskSize")
+        $taskKitchenSave = 'user://packed-kitchen-' + [Guid]::NewGuid().ToString('N')
+        $taskKitchenPreview = (Join-Path $taskBuild "previews-packed-kitchen-$taskSize").Replace('\', '/')
+        Invoke-ExportCheck -Name "kitchen-packed-$taskSize" -Arguments @('--main-pack', $taskPack, '--script', (Join-Path $taskProject 'tests\interaction_smoke.gd'), '--', "--save-dir=$taskKitchenSave", "--preview-dir=$taskKitchenPreview", "--test-size=$taskSize", '--test-room=kitchen')
     }
 }
 if ($Android) {

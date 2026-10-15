@@ -1,5 +1,16 @@
 # Historial de cambios
 
+## 2026-10-15 — 0.2.0: cocina y selección de habitaciones
+
+- Cocina jugable con ocho objetos: tazas, platos, frasco, repasador, botella y recetario; seis destinos, alacena, isla para limpiar y recuerdo propio.
+- Selector «La casa» desde el nombre de la habitación, con estado/estrellas y acceso libre a ambos espacios en Relax.
+- Progreso, respaldo y protección de versiones independientes; dormitorio histórico intacto y última habitación recordada.
+- RoomView comparte mecanismos de representación; BedroomView/KitchenView aportan decoración. Cámara y audio sobreviven al cambio.
+- Corregida prioridad del destino al tocar dentro de un mueble abierto con un objeto seleccionado; repetición sin recargar toda la aplicación.
+- Vista vertical y música de 0.1.3 conservadas. Textos de ambas habitaciones en español/inglés.
+- Regresión: 58 reglas, 31 recursos, 26 habitaciones, 44 distribución, 65 dormitorio y 38 cocina por orientación/renderizador/paquete, 9 datos exportados; sin fallos.
+- Android físico, evaluación humana y mediciones móviles continúan pendientes.
+
 ## 2026-10-14 — 0.1.3: smartphone vertical y música
 
 - Vista principal vertical 9:20, elegida por Matías; ventana de desarrollo 432 × 960 y Android en portrait.

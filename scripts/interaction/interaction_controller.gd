@@ -8,7 +8,7 @@ signal stroke_finished
 signal cleaning_motion(intensity: float)
 
 var session: GameSession
-var view: BedroomView
+var view: RoomView
 var rig: CameraController
 var hud: GameHUD
 var clean_tool: bool = false
@@ -27,7 +27,7 @@ var drag_height: float = 0.0
 var drag_offset: Vector3 = Vector3.ZERO
 var last_clean_time: int = 0
 
-func configure(state: GameSession, room: BedroomView, camera_rig: CameraController, interface: GameHUD) -> void:
+func configure(state: GameSession, room: RoomView, camera_rig: CameraController, interface: GameHUD) -> void:
 	session = state
 	view = room
 	rig = camera_rig
@@ -85,12 +85,13 @@ func _unhandled_input(event: InputEvent) -> void:
 	if event is InputEventMouse and event.device == InputEvent.DEVICE_ID_EMULATION:
 		return
 	if event is InputEventKey and event.pressed and not event.echo:
-		if hud.settings_overlay.visible and event.keycode != KEY_ESCAPE:
+		if (hud.settings_overlay.visible or hud.rooms_overlay.visible) and event.keycode != KEY_ESCAPE:
 			return
 		match event.keycode:
 			KEY_ESCAPE:
 				cancel()
 				hud.close_settings()
+				hud.rooms_overlay.visible = false
 			KEY_C:
 				hud.request_clean.emit()
 			KEY_U:
@@ -146,6 +147,15 @@ func _press(position: Vector2, orbit_only: bool = false) -> void:
 		else:
 			message.emit("CLEAN_HINT", false)
 		return
+	# The cabinet's broad hit area also covers its open shelves.
+	# A selected item gets priority there; an empty hand still toggles the door.
+	if kind == "container" and session.opened[id] and not selected_item.is_empty():
+		var target_id: String = view.nearest_target(position, rig.camera, selected_item)
+		if not target_id.is_empty() and session.level.placement(target_id).container_id == id:
+			mode = "destination"
+			tap_id = target_id
+			_preview_destination(target_id)
+			return
 	# An item already sitting in a destination must not steal that destination's tap.
 	if kind == "item" and not selected_item.is_empty() and id != selected_item and session.placements.has(id):
 		mode = "destination"

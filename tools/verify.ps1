@@ -27,6 +27,7 @@ Invoke-GameCheck -Name 'import' -Arguments @('--headless', '--path', $taskProjec
 Invoke-GameCheck -Name 'run' -Arguments @('--headless', '--path', $taskProject, '--quit-after', '60', '--', '--no-save')
 Invoke-GameCheck -Name 'domain' -Arguments @('--headless', '--path', $taskProject, '--script', 'tests/domain_tests.gd')
 Invoke-GameCheck -Name 'assets' -Arguments @('--headless', '--path', $taskProject, '--script', 'tests/asset_tests.gd')
+Invoke-GameCheck -Name 'rooms' -Arguments @('--headless', '--path', $taskProject, '--script', 'tests/rooms_tests.gd')
 if ($Graphics) {
     Invoke-GameCheck -Name 'layout' -Arguments @('--path', $taskProject, '--script', 'tests/layout_tests.gd', '--', '--no-save')
     foreach ($taskRenderer in @('mobile', 'gl_compatibility')) {
@@ -34,6 +35,8 @@ if ($Graphics) {
             $taskSaveDirectory = 'res://build/input-' + [Guid]::NewGuid().ToString('N')
             $taskPreviewDirectory = "res://build/previews-$taskRenderer-$taskSize"
             Invoke-GameCheck -Name "input-$taskRenderer-$taskSize" -Arguments @('--path', $taskProject, '--rendering-method', $taskRenderer, '--script', 'tests/interaction_smoke.gd', '--', "--save-dir=$taskSaveDirectory", "--preview-dir=$taskPreviewDirectory", "--test-size=$taskSize")
+            $taskKitchenSave = 'res://build/kitchen-input-' + [Guid]::NewGuid().ToString('N')
+            Invoke-GameCheck -Name "kitchen-$taskRenderer-$taskSize" -Arguments @('--path', $taskProject, '--rendering-method', $taskRenderer, '--script', 'tests/interaction_smoke.gd', '--', "--save-dir=$taskKitchenSave", "--preview-dir=res://build/previews-kitchen-$taskRenderer-$taskSize", "--test-size=$taskSize", '--test-room=kitchen')
         }
     }
 }
