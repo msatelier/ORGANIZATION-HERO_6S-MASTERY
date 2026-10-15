@@ -110,3 +110,9 @@ Se conserva selección ante rechazo y se limpia al confirmar/cancelar. Un gesto 
 ItemData.sound_profile permite escoger tela, papel, plástico, blando o madera sin condicionar las reglas. La señal de acción confirmada lleva IDs/contexto y GameRoot hace la conexión. SoundPalette sintetiza clips propios con variantes, envolventes y bucles; el paño tiene una voz independiente que depende de movimiento y se desvanece. Un limitador único en Master limita picos al mezclar. Se evita una dependencia de bancos externos durante esta ronda; escucha humana y calidad ASMR definitiva siguen abiertas.
 
 Los nuevos campos visuales/sonoros no se guardan en el progreso. Esquema y versión de contenido permanecen en 1; no cambia la solución del nivel ni se requiere migración de 0.1.0/0.1.1.
+
+## D-013: vista vertical por preferencia de Matías y música preparada
+
+Matías eligió vertical el 14 de octubre de 2026. Esta indicación actualiza el landscape inicial del prompt. Se usa base lógica cuadrada 480 × 480 con expand, ventana 432 × 960 y Android portrait. MobileLayout calcula paneles/zona jugable a partir del área segura; CameraController encuadra habitación o mesa en esa zona y usa zoom relativo. La distribución horizontal sigue disponible al redimensionar en PC. Se verifican límites y entrada en ambas orientaciones, sin atribuir a la PC una prueba física de teléfono.
+
+El acorde sostenido se reemplaza por una composición original de 16 compases a 96 BPM. MusicComposer y bake-music.gd generan el WAV previamente; la ejecución no compone la música. Se conserva PCM, sin normalización/compresión del importador, y se verifica el bucle completo desde el paquete. La mezcla mantiene los buses y ajustes existentes. No cambia el esquema de progreso.

@@ -1,6 +1,6 @@
 # Registro de arte y sonido
 
-14 de octubre de 2026. Primera mejora de presentación, versión 0.1.2.
+14 de octubre de 2026. Presentación actualizada a versión 0.1.3.
 
 ## Procedencia
 
@@ -18,7 +18,7 @@ Geometría, icono, colores, shader y síntesis sonora creados para este proyecto
 | Armario | scripts/systems/sound_palette.gd | Apertura y cierre diferenciados | Integrados |
 | Roce del paño | scripts/systems/sound_palette.gd + feedback_manager.gd | Bucle con intensidad por movimiento, entrada/salida gradual | Integrado; silencio al detener/cancelar |
 | Hallazgo y final | scripts/systems/sound_palette.gd | Frases tonales suaves | Integradas |
-| Ambiente | scripts/systems/sound_palette.gd | Acorde periódico de ocho segundos | Integrado; escucha humana pendiente |
+| Música | scripts/systems/music_composer.gd + assets/audio/bedroom_theme.wav | Melodía original, bajo, arpegios y percusión, 96 BPM, 40 segundos | Sustituye el acorde anterior; integrada y comprobada técnicamente |
 
 El perfil sonoro se declara en ItemData.sound_profile. La colocación identifica objeto y destino; GameRoot consulta sus datos y FeedbackManager reproduce el sonido. Las reglas no conocen buses ni formas de onda. Un perfil desconocido utiliza madera como alternativa.
 
@@ -26,7 +26,7 @@ El perfil sonoro se declara en ItemData.sound_profile. La colocación identifica
 
 Los modelos se generan al iniciar la escena; no se regeneran al arrastrar o limpiar. MeshBatcher agrupa mallas de una superficie y material compartido entre hermanos con el mismo movimiento. Mantiene independientes colisionadores, etiquetas, pads, puerta y selección. No debe aplicarse a mallas con visibilidad o animación individual; admite una lista explícita de exclusiones. Usa [SurfaceTool](https://docs.godotengine.org/en/stable/classes/class_surfacetool.html) para conservar transformaciones y materiales.
 
-La paleta genera 23 clips una vez por escena y se libera al salir. El paño usa una voz independiente de los tres efectos discretos. Ambos pasan por Effects; la música por Music. En Master se instala un único [AudioEffectHardLimiter](https://docs.godotengine.org/en/stable/classes/class_audioeffecthardlimiter.html) con techo de −1 dB, incluso al repetir. El limitador controla picos de la mezcla; no sustituye una revisión de volumen y comodidad con jugadores.
+La paleta combina efectos generados una vez por escena y música preparada previamente. El paño usa una voz independiente de los tres efectos discretos. Ambos pasan por Effects; la música por Music. En Master se instala un único [AudioEffectHardLimiter](https://docs.godotengine.org/en/stable/classes/class_audioeffecthardlimiter.html) con techo de −1 dB, incluso al repetir. El limitador controla picos de la mezcla; no sustituye una revisión de volumen y comodidad con jugadores.
 
 ## Evidencia y muestra
 

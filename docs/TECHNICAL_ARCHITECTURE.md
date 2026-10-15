@@ -1,6 +1,6 @@
 # Arquitectura técnica propuesta
 
-Actualización: 14 de octubre de 2026. Arquitectura objetivo con prototipo 0.1.2 implementado. GameRoot coordina; GameSession, PlacementRules, SaveStore, CameraController, InteractionController, BedroomView, GameHUD y FeedbackManager están integrados. [Evidencia](PROTOTYPE_REPORT.md).
+Actualización: 14 de octubre de 2026. Arquitectura objetivo con prototipo 0.1.3 implementado. GameRoot coordina; GameSession, PlacementRules, SaveStore, CameraController, InteractionController, BedroomView, GameHUD y FeedbackManager están integrados. [Evidencia](PROTOTYPE_REPORT.md).
 
 ## Capas y autoridad del estado
 
@@ -108,3 +108,9 @@ ItemVisuals construye siluetas extruidas y volúmenes redondeados; BedroomView c
 SoundPalette crea 23 clips PCM mono, incluyendo tres variantes de cinco materiales, armario, hallazgo/final, paño y ambiente. FeedbackManager administra tres voces discretas, otra para el paño y otra para música. La entrada de limpieza emite intensidad por movimiento sobre superficie; la voz se desvanece sin eventos nuevos y al cancelar. Un único limitador de Master controla la mezcla al repetir.
 
 La síntesis sigue siendo una producción de desarrollo. El [registro de recursos](ASSET_REGISTER.md) diferencia pruebas técnicas, revisión visual y escucha humana pendiente. No se interpreta una reducción de llamadas de dibujo como aceptación del rendimiento móvil.
+
+## Presentación móvil y música en 0.1.3
+
+MobileLayout calcula paneles y zona jugable desde el viewport lógico y zona segura. GameHUD coloca las regiones, redistribuye objetivos/acciones y emite el rectángulo de juego; CameraController adapta tamaño y desplazamiento de la proyección a ese rectángulo. Cancelar al cambiar tamaño evita que un gesto confirme usando un encuadre anterior. La distribución usa base cuadrada con expand; Android queda en portrait según preferencia de Matías.
+
+MusicComposer produce la composición mediante bake-music.gd. El WAV y su importación PCM/bucle se versionan; SoundPalette lo carga junto con los efectos, sin componer durante el arranque. Se mantienen Music/Effects, pausa, fade y limitador. Los cambios de presentación no requieren migrar progreso.

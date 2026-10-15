@@ -101,7 +101,7 @@ func _label(parent: Node3D, text_key: String, position: Vector3) -> Label3D:
 	label.text = tr(text_key)
 	label.position = position
 	label.font_size = 46
-	label.pixel_size = 0.006
+	label.pixel_size = 0.009
 	label.outline_size = 7
 	label.modulate = Color(1.0, 0.96, 0.83)
 	label.outline_modulate = Color(0.12, 0.23, 0.22)
@@ -387,7 +387,7 @@ func _refresh_destinations() -> void:
 			for item_id: String in session.placements:
 				if session.placements[item_id] == key:
 					occupied += 1
-			labels[key].text += "\n" + tr("FREE_SLOTS") % (rule.slots.size() - occupied)
+			labels[key].text += "\n" + tr("FREE_SLOTS_MOBILE") % (rule.slots.size() - occupied)
 
 func nearest_target(screen_position: Vector2, camera: Camera3D, item_id: String = "") -> String:
 	var nearest: String = ""

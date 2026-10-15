@@ -28,10 +28,13 @@ Invoke-GameCheck -Name 'run' -Arguments @('--headless', '--path', $taskProject, 
 Invoke-GameCheck -Name 'domain' -Arguments @('--headless', '--path', $taskProject, '--script', 'tests/domain_tests.gd')
 Invoke-GameCheck -Name 'assets' -Arguments @('--headless', '--path', $taskProject, '--script', 'tests/asset_tests.gd')
 if ($Graphics) {
+    Invoke-GameCheck -Name 'layout' -Arguments @('--path', $taskProject, '--script', 'tests/layout_tests.gd', '--', '--no-save')
     foreach ($taskRenderer in @('mobile', 'gl_compatibility')) {
-        $taskSaveDirectory = 'res://build/input-' + [Guid]::NewGuid().ToString('N')
-        $taskPreviewDirectory = if ($taskRenderer -eq 'mobile') { 'res://build/previews' } else { 'res://build/previews-compatibility' }
-        Invoke-GameCheck -Name "input-$taskRenderer" -Arguments @('--path', $taskProject, '--rendering-method', $taskRenderer, '--script', 'tests/interaction_smoke.gd', '--', "--save-dir=$taskSaveDirectory", "--preview-dir=$taskPreviewDirectory")
+        foreach ($taskSize in @('432x960', '960x432')) {
+            $taskSaveDirectory = 'res://build/input-' + [Guid]::NewGuid().ToString('N')
+            $taskPreviewDirectory = "res://build/previews-$taskRenderer-$taskSize"
+            Invoke-GameCheck -Name "input-$taskRenderer-$taskSize" -Arguments @('--path', $taskProject, '--rendering-method', $taskRenderer, '--script', 'tests/interaction_smoke.gd', '--', "--save-dir=$taskSaveDirectory", "--preview-dir=$taskPreviewDirectory", "--test-size=$taskSize")
+        }
     }
 }
 Write-Output 'Verificación completada. Esto no acredita pruebas en hardware móvil.'

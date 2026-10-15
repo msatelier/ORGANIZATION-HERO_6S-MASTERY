@@ -25,5 +25,9 @@ func _initialize() -> void:
 	if level.item("shirt_gold").shape != "shirt" or level.item("sock_blue").shape != "socks" or level.item("bottle").sound_profile != "plastic":
 		failures += 1
 		push_error("Export lost visual or material sound metadata")
-	print("EXPORT DATA RESULT: 6 checks, %d failures" % failures)
+	var music: AudioStreamWAV = load("res://assets/audio/bedroom_theme.wav")
+	if music == null or music.format != AudioStreamWAV.FORMAT_16_BITS or not is_equal_approx(music.get_length(), 40.0) or music.loop_mode != AudioStreamWAV.LOOP_FORWARD:
+		failures += 1
+		push_error("Exported music format or complete loop is missing")
+	print("EXPORT DATA RESULT: 7 checks, %d failures" % failures)
 	quit(1 if failures > 0 else 0)

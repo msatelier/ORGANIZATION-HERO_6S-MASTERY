@@ -16,7 +16,11 @@ static func create() -> Dictionary[String, AudioStreamWAV]:
 	palette["collectible"] = _chime(PackedFloat32Array([440.0, 550.0, 660.0]), 0.7, 0.28)
 	palette["finish"] = _chime(PackedFloat32Array([330.0, 440.0, 550.0, 660.0]), 1.15, 0.25)
 	palette["brush"] = _foley("brush", 0)
-	palette["ambient"] = _ambient()
+	var music: AudioStreamWAV = preload("res://assets/audio/bedroom_theme.wav").duplicate()
+	music.loop_mode = AudioStreamWAV.LOOP_FORWARD
+	music.loop_begin = 0
+	music.loop_end = music.data.size() / 2
+	palette["music"] = music
 	return palette
 
 static func _foley(profile: String, variant: int) -> AudioStreamWAV:
@@ -77,22 +81,6 @@ static func _chime(notes: PackedFloat32Array, duration: float, gain: float) -> A
 		bytes.encode_s16(index * 2, roundi(wave * gain * end * 32767))
 	bytes.encode_s16((count - 1) * 2, 0)
 	return _stream(bytes)
-
-static func _ambient() -> AudioStreamWAV:
-	var duration: float = 8.0
-	var count: int = roundi(duration * RATE)
-	var bytes: PackedByteArray = []
-	bytes.resize(count * 2)
-	var notes: PackedFloat32Array = PackedFloat32Array([110, 220, 275, 329.625])
-	for index: int in range(count):
-		var time: float = float(index) / RATE
-		var wave: float = 0.0
-		for frequency: float in notes:
-			# Every oscillator completes an integer number of cycles in the loop.
-			wave += sin(TAU * frequency * time) / notes.size()
-		var gain: float = 0.12 + 0.015 * sin(TAU * time / duration)
-		bytes.encode_s16(index * 2, roundi(wave * gain * 32767))
-	return _stream(bytes, true)
 
 static func _stream(bytes: PackedByteArray, looping: bool = false) -> AudioStreamWAV:
 	var stream: AudioStreamWAV = AudioStreamWAV.new()

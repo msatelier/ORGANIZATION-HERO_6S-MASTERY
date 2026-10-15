@@ -18,21 +18,23 @@ func _run() -> void:
 	var palette: Dictionary[String, AudioStreamWAV] = SoundPalette.create()
 	for key: String in palette:
 		var clip: AudioStreamWAV = palette[key]
+		var samples: PackedByteArray = clip.data
 		var peak: int = 0
 		var total: float = 0.0
-		var count: int = clip.data.size() / 2
+		var count: int = samples.size() / 2
 		for sample: int in range(count):
-			var value: int = clip.data.decode_s16(sample * 2)
+			var value: int = samples.decode_s16(sample * 2)
 			peak = maxi(peak, absi(value))
 			total += value
-		var boundaries: bool = key == "ambient" or (clip.data.decode_s16(0) == 0 and clip.data.decode_s16((count - 1) * 2) == 0)
+		var boundaries: bool = key == "music" or (samples.decode_s16(0) == 0 and samples.decode_s16((count - 1) * 2) == 0)
 		check(clip.format == AudioStreamWAV.FORMAT_16_BITS and clip.mix_rate == 22050 and not clip.stereo and count > 0 and peak > 0 and peak < 20000 and absf(total / count) < 655 and boundaries, "PCM format, headroom, DC and boundary safety: " + key)
 	check(palette["place_fabric_0"].data != palette["place_paper_0"].data and palette["place_plastic_0"].data != palette["place_wood_0"].data, "different materials have different waveforms")
 	check(palette["place_fabric_0"].data != palette["place_fabric_1"].data, "repeated material has a distinct variant")
-	for key: String in ["ambient", "brush"]:
+	for key: String in ["music", "brush"]:
 		var clip: AudioStreamWAV = palette[key]
 		var last: int = clip.data.decode_s16(clip.data.size() - 2)
 		check(clip.loop_mode == AudioStreamWAV.LOOP_FORWARD and clip.loop_end == clip.data.size() / 2 and absi(last - clip.data.decode_s16(0)) < 400, "loop extent and seam: " + key)
+	check(is_equal_approx(palette["music"].get_length(), 40.0), "music contains the complete 16 bar composition")
 
 	var parent: Node3D = Node3D.new()
 	var material: StandardMaterial3D = StandardMaterial3D.new()

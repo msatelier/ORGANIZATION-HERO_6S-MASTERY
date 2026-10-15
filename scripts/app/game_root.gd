@@ -48,9 +48,12 @@ func _ready() -> void:
 	add_child(hud)
 	hud.bind(session)
 	hud.apply_settings(settings)
+	hud.layout_changed.connect(rig.set_play_area)
+	rig.set_play_area(hud.play_area)
 	interaction = InteractionController.new()
 	add_child(interaction)
 	interaction.configure(session, room, rig, hud)
+	get_viewport().size_changed.connect(func() -> void: interaction.cancel())
 	interaction.message.connect(_message)
 	interaction.selected.connect(func(id: String) -> void:
 		hud.selected_id = id
@@ -106,7 +109,7 @@ func _toggle_clean() -> void:
 	hud.selected_id = ""
 	room.select("")
 	if interaction.clean_tool:
-		rig.focus_surface(LEVEL.cleaning.position)
+		rig.focus_surface(LEVEL.cleaning.position, LEVEL.cleaning.size)
 	else:
 		rig.overview()
 	hud.refresh()

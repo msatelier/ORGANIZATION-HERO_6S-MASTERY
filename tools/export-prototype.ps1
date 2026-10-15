@@ -28,9 +28,11 @@ $taskPack = Join-Path $taskBuild 'OrganizationHero.pck'
 Invoke-ExportCheck -Name 'export-data' -Arguments @('--headless', '--main-pack', $taskPack, '--script', (Join-Path $taskProject 'tests\export_data_tests.gd'))
 Invoke-ExportCheck -Name 'packed-run' -Arguments @('--headless', '--main-pack', $taskPack, '--quit-after', '60', '--', '--no-save')
 if ($Graphics) {
-    $taskSaveDirectory = 'user://packed-input-' + [Guid]::NewGuid().ToString('N')
-    $taskPreviewDirectory = (Join-Path $taskBuild 'previews-packed').Replace('\', '/')
-    Invoke-ExportCheck -Name 'input-packed' -Arguments @('--main-pack', $taskPack, '--script', (Join-Path $taskProject 'tests\interaction_smoke.gd'), '--', "--save-dir=$taskSaveDirectory", "--preview-dir=$taskPreviewDirectory")
+    foreach ($taskSize in @('432x960', '960x432')) {
+        $taskSaveDirectory = 'user://packed-input-' + [Guid]::NewGuid().ToString('N')
+        $taskPreviewDirectory = (Join-Path $taskBuild "previews-packed-$taskSize").Replace('\', '/')
+        Invoke-ExportCheck -Name "input-packed-$taskSize" -Arguments @('--main-pack', $taskPack, '--script', (Join-Path $taskProject 'tests\interaction_smoke.gd'), '--', "--save-dir=$taskSaveDirectory", "--preview-dir=$taskPreviewDirectory", "--test-size=$taskSize")
+    }
 }
 if ($Android) {
     $taskApk = Join-Path $taskBuild 'OrganizationHero-debug.apk'

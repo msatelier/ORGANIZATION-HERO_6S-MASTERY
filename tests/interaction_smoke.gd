@@ -32,14 +32,23 @@ func _run() -> void:
 	for argument: String in OS.get_cmdline_user_args():
 		if argument.begins_with("--preview-dir="):
 			output_dir = argument.trim_prefix("--preview-dir=")
+		elif argument.begins_with("--test-size="):
+			var dimensions: PackedStringArray = argument.trim_prefix("--test-size=").split("x")
+			root.size = Vector2i(dimensions[0].to_int(), dimensions[1].to_int())
 	DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path(output_dir))
+	print("TEST VIEW: %s / screen transform %s" % [root.get_visible_rect().size, root.get_final_transform()])
 	app = MAIN.instantiate()
 	app.save_directory = "res://build/integration-%d" % Time.get_ticks_usec()
 	root.add_child(app)
 	current_scene = app
 	await frames(30)
+	await create_timer(0.6).timeout
 	check(app.hud.title.text == "ORGANIZATION HERO", "main scene and HUD start")
 	check(not app.session.completed and app.session.placements.is_empty(), "fresh isolated session starts")
+	var fitted: bool = true
+	for point: Vector3 in app.rig.frame_points:
+		fitted = fitted and app.hud.play_area.grow(3).has_point(app.rig.camera.unproject_position(point))
+	check(fitted, "overview framing keeps the room inside the mobile play area")
 	await capture("bedroom-before")
 	await touch_tap(item_screen("book_mint"))
 	check(app.interaction.selected_item == "book_mint" and app.hud.selected_id == "book_mint" and app.room.destination_guides["shelf"].visible and not app.room.destination_guides["basket"].visible, "touch selects an item and marks only available matching destinations")
@@ -47,7 +56,7 @@ func _run() -> void:
 	await touch_tap(target_screen("toy_box"))
 	check(app.session.placements.is_empty() and app.interaction.selected_item == "book_mint" and app.hud.toast.text == app.tr("WRONG_CATEGORY"), "invalid destination tap explains rejection and preserves selection")
 	await touch_tap(app.hud.buttons["OVERVIEW"].get_global_rect().get_center())
-	check(app.interaction.selected_item.is_empty() and app.hud.buttons["OVERVIEW"].text == app.tr("OVERVIEW"), "contextual touch cancel clears selection without requiring a keyboard")
+	check(app.interaction.selected_item.is_empty() and app.hud.buttons["OVERVIEW"].text == app.tr("VIEW_SHORT"), "contextual touch cancel clears selection without requiring a keyboard")
 	await touch_tap(item_screen("book_mint"))
 	await touch_tap(target_screen("shelf"))
 	await frames(18)
@@ -83,7 +92,7 @@ func _run() -> void:
 	await frames()
 	var cancellation: InputEventScreenTouch = InputEventScreenTouch.new()
 	cancellation.index = 0
-	cancellation.position = cancellation_from + Vector2(35, 0)
+	cancellation.position = input_point(cancellation_from + Vector2(35, 0))
 	cancellation.canceled = true
 	Input.parse_input_event(cancellation)
 	await frames(18)
@@ -98,7 +107,7 @@ func _run() -> void:
 	check(anchor_error < 1.5, "drag keeps original grab offset without jumping to a higher plane (error %.2f px)" % anchor_error)
 	var wheel_release: InputEventMouseButton = InputEventMouseButton.new()
 	wheel_release.button_index = MOUSE_BUTTON_WHEEL_UP
-	wheel_release.position = anchor_from + Vector2(15, 0)
+	wheel_release.position = input_point(anchor_from + Vector2(15, 0))
 	Input.parse_input_event(wheel_release)
 	await frames()
 	check(app.interaction.mode == "drag" and app.session.placements.is_empty(), "unrelated mouse button release cannot commit or cancel active drag")
@@ -131,14 +140,17 @@ func _run() -> void:
 	check(app.session.placements.get("shirt_gold") == "wardrobe", "touch drag organizes item")
 
 	var old_size: float = app.rig.desired_size
-	touch_event(0, Vector2(350, 470), true)
+	var pinch_left: Vector2 = app.hud.play_area.position + app.hud.play_area.size * Vector2(0.25, 0.8)
+	var pinch_right: Vector2 = app.hud.play_area.position + app.hud.play_area.size * Vector2(0.6, 0.8)
+	var pinch_expanded: Vector2 = app.hud.play_area.position + app.hud.play_area.size * Vector2(0.8, 0.8)
+	touch_event(0, pinch_left, true)
 	await frames()
-	touch_event(1, Vector2(600, 470), true)
+	touch_event(1, pinch_right, true)
 	await frames()
-	touch_motion(1, Vector2(700, 470))
+	touch_motion(1, pinch_expanded)
 	await frames()
-	touch_event(1, Vector2(700, 470), false)
-	touch_event(0, Vector2(350, 470), false)
+	touch_event(1, pinch_expanded, false)
+	touch_event(0, pinch_left, false)
 	await frames()
 	check(app.rig.desired_size < old_size and app.interaction.touches.is_empty(), "pinch zoom and all releases reset gesture")
 	app.rig.overview()
@@ -297,6 +309,7 @@ func touch_tap(point: Vector2) -> void:
 	await frames()
 
 func mouse_button(point: Vector2, pressed: bool) -> void:
+	point = input_point(point)
 	var event: InputEventMouseButton = InputEventMouseButton.new()
 	event.position = point
 	event.global_position = point
@@ -306,6 +319,7 @@ func mouse_button(point: Vector2, pressed: bool) -> void:
 	Input.parse_input_event(event)
 
 func mouse_motion(point: Vector2) -> void:
+	point = input_point(point)
 	var event: InputEventMouseMotion = InputEventMouseMotion.new()
 	event.position = point
 	event.global_position = point
@@ -313,6 +327,7 @@ func mouse_motion(point: Vector2) -> void:
 	Input.parse_input_event(event)
 
 func touch_event(index: int, point: Vector2, pressed: bool) -> void:
+	point = input_point(point)
 	var event: InputEventScreenTouch = InputEventScreenTouch.new()
 	event.index = index
 	event.position = point
@@ -320,10 +335,15 @@ func touch_event(index: int, point: Vector2, pressed: bool) -> void:
 	Input.parse_input_event(event)
 
 func touch_motion(index: int, point: Vector2) -> void:
+	point = input_point(point)
 	var event: InputEventScreenDrag = InputEventScreenDrag.new()
 	event.index = index
 	event.position = point
 	Input.parse_input_event(event)
+
+func input_point(point: Vector2) -> Vector2:
+	# Native events enter in window pixels; the engine applies the content scale.
+	return root.get_final_transform() * point
 
 func capture(name: String) -> void:
 	if not graphical:

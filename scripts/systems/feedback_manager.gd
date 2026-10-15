@@ -26,7 +26,7 @@ func _ready() -> void:
 	if DisplayServer.get_name() == "headless":
 		return
 	clips = SoundPalette.create()
-	music.stream = clips["ambient"]
+	music.stream = clips["music"]
 	music.volume_db = -40
 	music.play()
 	create_tween().tween_property(music, "volume_db", 0.0, 0.7)

@@ -1,6 +1,6 @@
 # Hoja de ruta y backlog inicial
 
-Fecha: 14 de octubre de 2026. Actualizada tras el refinamiento 0.1.2. Hitos por resultado; sin calendario comercial comprometido.
+Fecha: 14 de octubre de 2026. Actualizada tras el refinamiento 0.1.3. Hitos por resultado; sin calendario comercial comprometido.
 
 | Hito | Fase del prompt | Resultado | Estado |
 | --- | --- | --- | --- |
@@ -67,6 +67,8 @@ Cierre: completar de principio a fin, reiniciar la aplicación y recuperar progr
 Realizado en 0.1.1: colocación con dos toques/clics, guías de capacidad, pistas disponibles, agarre estable, cancelación, puerta animada y reducción aplicada a la cámara. Regresión completa desde fuente y paquete comprobada en PC. Es una ronda de refinamiento; M4 continúa abierto.
 
 Realizado en 0.1.2: siluetas y detalles de modelos, decoración, geometría agrupada, cinco perfiles sonoros, variantes, roce por movimiento y limitador de mezcla. Validación de geometría/PCM y ciclo completo en PC. Próximas tareas independientes del dispositivo: interfaz en otras proporciones, revisión con Matías y contenido reutilizable. Escucha con jugadores y aceptación móvil continúan abiertas.
+
+Realizado en 0.1.3, a pedido de Matías: vista principal vertical de smartphone, interfaz adaptable, encuadre/márgenes, ciclo completo en ambas orientaciones y nueva música rítmica. Continúa la preparación de contenido reutilizable; falta evaluar la nueva mezcla con el jugador y medir hardware móvil cuando esté disponible.
 
 - Sustituir recursos provisionales prioritarios con autoría/licencia registrada.
 - Ajustar controles, animaciones, iluminación, audio y claridad de tareas.

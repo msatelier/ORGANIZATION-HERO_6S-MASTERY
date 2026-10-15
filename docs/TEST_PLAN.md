@@ -1,6 +1,6 @@
 # Plan de pruebas y aceptación
 
-Actualización: 14 de octubre de 2026. Prototipo 0.1.2 verificado. [Informe y evidencias](PROTOTYPE_REPORT.md): 58 comprobaciones de reglas, 30 de recursos, 64 de integración por renderizador y sobre paquete, 6 de datos exportados. Hardware móvil pendiente.
+Actualización: 14 de octubre de 2026. Prototipo 0.1.3 verificado. [Informe y evidencias](PROTOTYPE_REPORT.md): 58 comprobaciones de reglas, 31 de recursos, 36 de distribución, 65 de integración por orientación/renderizador y sobre paquete, 7 de datos exportados. Hardware móvil pendiente.
 
 ## Niveles de verificación
 
@@ -77,6 +77,6 @@ No hay Android disponible. No se comprobó iOS. El simulador o el escritorio pue
 
 Runner GDScript implementado: tests/domain_tests.gd y tests/asset_tests.gd para headless, tests/interaction_smoke.gd para ventana real. tests/export_data_tests.gd verifica datos del paquete. tools/verify.ps1 y tools/export-prototype.ps1 comprueban salida y errores de registros. No se usa un framework adicional. GitHub Actions puede importar/analizar y ejecutar esas pruebas con Godot 4.7.2 fijado. No existe aún workflow de CI.
 
-0.1.2: 58 comprobaciones de dominio, 30 de geometría/audio, 64 de integración por renderizador y sobre PCK, 6 de datos exportados. export-prototype.ps1 -Graphics recorre el paquete exportado. Los recorridos del juego usan guardados aislados; no reemplazan la partida del jugador.
+0.1.3: tests/layout_tests.gd verifica límites, superposiciones, tamaños táctiles, encuadre y márgenes simulados en cuatro tamaños y dos idiomas. verify.ps1 -Graphics recorre vertical/horizontal con Mobile y Compatibility. export-prototype.ps1 -Graphics recorre ambas orientaciones del PCK. Los recorridos usan guardados aislados; no reemplazan la partida del jugador. La música se comprueba también después de importar/exportar el WAV.
 
 Registrar cada resultado con commit, prueba, plataforma, resultado, evidencia y defecto asociado. Solo marcar «verificado» lo efectivamente ejecutado. La lista de pendientes no bloquea el avance de tareas independientes, pero debe acompañar la entrega.

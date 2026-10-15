@@ -1,5 +1,16 @@
 # Historial de cambios
 
+## 2026-10-14 — 0.1.3: smartphone vertical y música
+
+- Vista principal vertical 9:20, elegida por Matías; ventana de desarrollo 432 × 960 y Android en portrait.
+- Interfaz adaptable, objetivos/acciones inferiores en vertical y laterales en horizontal, ajustes desplazables y controles de al menos 48 unidades.
+- Cámara ajustada al espacio libre, márgenes seguros en todos los bordes y cancelación al redimensionar.
+- Etiquetas del mundo más grandes y textos móviles compactos en ambos idiomas.
+- Melodía original de juego de 40 segundos a 96 BPM, preparada previamente, reemplazando el acorde sostenido.
+- Corregidos escala de eventos simulados, formato/bucle del WAV importado y lectura eficiente de muestras en pruebas.
+- 58 comprobaciones de reglas, 31 de recursos, 36 de distribución, 65 por combinación de tamaño/renderizador y 7 de exportación; sin fallos. Paquete recorrido en ambas orientaciones.
+- Progreso conservado. Hardware Android y evaluación sonora/táctil humana siguen pendientes.
+
 ## 2026-10-14 — 0.1.2: arte y sonido por material
 
 - Siluetas de prendas y medias mediante polígonos extruidos; peluche redondeado con patas, orejas, hocico y lazo.
